@@ -1,0 +1,53 @@
+# 动画大冒险角色卡配置文件
+name: 动画大冒险
+creator: ""
+character_version: "1.0"
+
+# 主要字段映射
+fields:
+  description: 作品/动画大冒险/角色设定_小白.xyaml
+  personality: ""
+  scenario: ""
+  first_mes: 作品/动画大冒险/开场白.md
+  mes_example: 作品/动画大冒险/对话补充_小白.xyaml
+  creator_notes: ""
+  system_prompt: ""
+  post_history_instructions: ""
+
+# 扩展字段
+extensions:
+  talkativeness: "0.5"
+  fav: false
+  world: 动画大冒险
+  status_bar: 作品/动画大冒险/状态栏.html
+
+# 角色书配置
+character_book:
+  name: 动画大冒险
+  entries:
+    # 背景设定
+    - comment: "背景设定"
+      content: 作品/动画大冒险/背景设定.xyaml
+      enabled: true
+      position: before_char
+      insertion_order: 1
+      depth: 4
+      role: 0
+
+    # 玩家角色
+    - comment: "玩家角色_{{user}}"
+      content: 作品/动画大冒险/玩家角色_{{user}}.xyaml
+      enabled: true
+      position: before_char
+      insertion_order: 2
+      depth: 4
+      role: 0
+
+    # 角色采访
+    - comment: "角色采访_小白"
+      content: 作品/动画大冒险/角色采访_小白.xyaml
+      enabled: true
+      position: after_char
+      insertion_order: 1
+      depth: 4
+      role: 0
