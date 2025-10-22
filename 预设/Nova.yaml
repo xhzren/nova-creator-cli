@@ -1,0 +1,317 @@
+# yaml-language-server: $schema=https://testingcf.jsdelivr.net/gh/StageDog/tavern_sync/dist/schema/preset.zh.json
+设置:
+  上下文长度: 409500
+  最大回复token数: 30000
+  流式传输: false
+  温度: 1
+  频率惩罚: 0
+  存在惩罚: 0
+  top_p: 0.8
+  top_k: 80
+  压缩系统消息: true
+  推理强度: 中
+  请求思维链: true
+  请求图片: false
+  启用函数调用: false
+  启用网络搜索: false
+  允许发送图片: 禁用
+  允许发送视频: false
+  角色名称前缀: 默认
+
+锚点: {}
+
+提示词:
+  - 名称: 系统调用
+    启用: true
+    插入位置:
+      类型: 相对
+    角色: 系统
+    文件: Nova/系统调用
+
+  - 名称: 主提示
+    启用: true
+    插入位置:
+      类型: 相对
+    角色: 系统
+    文件: Nova/主提示
+
+  - 名称: 辅助提示
+    启用: true
+    插入位置:
+      类型: 相对
+    角色: 系统
+    文件: Nova/辅助提示
+
+  - 名称: 故事设定开始
+    启用: true
+    插入位置:
+      类型: 相对
+    角色: 系统
+    文件: Nova/故事设定开始
+
+  - id: 角色定义之前
+    启用: true
+
+  - id: 玩家描述
+    启用: true
+
+  - id: 角色描述
+    启用: true
+
+  - id: 角色性格
+    启用: true
+
+  - id: 情景
+    启用: true
+
+  - id: 角色定义之后
+    启用: true
+
+  - 名称: 故事设定结束
+    启用: true
+    插入位置:
+      类型: 相对
+    角色: 系统
+    文件: Nova/故事设定结束
+
+  - id: 对话示例
+    启用: true
+
+  - id: 聊天记录
+    启用: true
+
+  - 名称: 思维链
+    启用: true
+    插入位置:
+      类型: 相对
+    角色: 系统
+    文件: Nova/思维链
+
+  - 名称: 输入处理
+    启用: true
+    插入位置:
+      类型: 相对
+    角色: 系统
+    文件: Nova/输入处理
+
+  - 名称: 文风：轻小说
+    启用: false
+    插入位置:
+      类型: 相对
+    角色: 系统
+    文件: Nova/文风：轻小说
+
+  - 名称: 文风：古风
+    启用: false
+    插入位置:
+      类型: 相对
+    角色: 系统
+    文件: Nova/文风：古风
+
+  - 名称: 文风：武侠
+    启用: false
+    插入位置:
+      类型: 相对
+    角色: 系统
+    文件: Nova/文风：武侠
+
+  - 名称: 文风：爽文
+    启用: false
+    插入位置:
+      类型: 相对
+    角色: 系统
+    文件: Nova/文风：爽文
+
+  - 名称: 成人内容指南
+    启用: false
+    插入位置:
+      类型: 相对
+    角色: 系统
+    文件: Nova/成人内容指南
+
+  - 名称: 写作指南：禁词
+    启用: false
+    插入位置:
+      类型: 相对
+    角色: 系统
+    文件: Nova/写作指南：禁词
+
+  - 名称: 写作指南：白话
+    启用: false
+    插入位置:
+      类型: 相对
+    角色: 系统
+    文件: Nova/写作指南：白话
+
+  - 名称: 抗重复
+    启用: true
+    插入位置:
+      类型: 相对
+    角色: 系统
+    文件: Nova/抗重复
+
+  - 名称: 抗升华
+    启用: true
+    插入位置:
+      类型: 相对
+    角色: 系统
+    文件: Nova/抗升华
+
+  - 名称: 选项设置
+    启用: true
+    插入位置:
+      类型: 相对
+    角色: 系统
+    文件: Nova/选项设置
+
+  - 名称: 总结（叙事）
+    启用: true
+    插入位置:
+      类型: 相对
+    角色: 系统
+    文件: Nova/总结（叙事）
+
+  - 名称: 大总结
+    启用: false
+    插入位置:
+      类型: 相对
+    角色: 系统
+    文件: Nova/大总结
+
+  - 名称: 反审查声明
+    启用: true
+    插入位置:
+      类型: 相对
+    角色: 系统
+    文件: Nova/反审查声明
+
+  - 名称: 输出格式
+    启用: true
+    插入位置:
+      类型: 相对
+    角色: 系统
+    文件: Nova/输出格式
+
+  - 名称: 用户指令强调
+    启用: true
+    插入位置:
+      类型: 相对
+    角色: AI
+    文件: Nova/用户指令强调
+
+  - 名称: 执行用户指令
+    启用: true
+    插入位置:
+      类型: 相对
+    角色: 用户
+    文件: Nova/执行用户指令
+
+  - 名称: 思考开始
+    启用: true
+    插入位置:
+      类型: 相对
+    角色: AI
+    文件: Nova/思考开始
+
+未添加的提示词: []
+
+扩展字段:
+  regex_scripts:
+    - id: 8da2ad38-41b3-43fc-bca6-3090c850132b
+      scriptName: 【Nova】隐藏think标签前内容
+      禁用: false
+      runOnEdit: false
+      findRegex: /^[\s\S]*?(<\/think>|<\/thinking>|<deleted_content>)/
+      replaceString: ""
+      trimStrings: []
+      placement:
+        - 2
+      substituteRegex: 0
+      minDepth: null
+      maxDepth: null
+      markdownOnly: true
+      promptOnly: true
+    - id: 6328c1f7-b195-42df-a2a3-b2ec02084f13
+      scriptName: 【Nova】(配合总结)修正总结
+      禁用: false
+      runOnEdit: true
+      findRegex: /detais/g
+      replaceString: details
+      trimStrings: []
+      placement:
+        - 2
+      substituteRegex: 0
+      minDepth: null
+      maxDepth: null
+      markdownOnly: true
+      promptOnly: true
+    - id: 50ec9ffc-65cc-41e4-88dc-e0d4261fe7b7
+      scriptName: 【Nova】(配合总结)隐藏5楼外正文
+      禁用: false
+      runOnEdit: true
+      findRegex: /^.*?<details>\s*<summary>\s*总结\s*<\/summary>(.*?)<\/details>.*?$/si
+      replaceString: $1
+      trimStrings: []
+      placement:
+        - 2
+      substituteRegex: 0
+      minDepth: 5
+      maxDepth: null
+      markdownOnly: true
+      promptOnly: true
+    - id: ed394e3e-f57f-48fe-a94c-3fa4603fa39b
+      scriptName: 【Nova】(配合总结)隐藏5楼内总结
+      禁用: false
+      runOnEdit: true
+      findRegex: /<details>\s*<summary>\s*总结\s*<\/summary>.*?<\/details>/gs
+      replaceString: ""
+      trimStrings: []
+      placement:
+        - 2
+      substituteRegex: 0
+      minDepth: null
+      maxDepth: 5
+      markdownOnly: false
+      promptOnly: true
+    - id: 8eda9cb4-8de1-4ce5-95e8-5244df48f65b
+      scriptName: 【Nova】(配反审查)新-隐藏声明
+      禁用: false
+      runOnEdit: false
+      findRegex: /<\/deleted_content>[\s\S]*?<\/content>/
+      replaceString: ""
+      trimStrings: []
+      placement:
+        - 2
+      substituteRegex: 0
+      minDepth: null
+      maxDepth: null
+      markdownOnly: true
+      promptOnly: true
+    - id: ee54431e-e9ab-468b-9a80-3f6be17e5b2b
+      scriptName: 【Nova】(配反审查)去掉声明
+      禁用: false
+      runOnEdit: true
+      findRegex: /<hr>\n<small><i>.*</i></small>/gs
+      replaceString: ""
+      trimStrings: []
+      placement:
+        - 2
+      substituteRegex: 0
+      minDepth: null
+      maxDepth: null
+      markdownOnly: true
+      promptOnly: true
+    - id: d68f2b92-0572-498c-8e7f-468051109eaf
+      scriptName: 【Nova】去掉中文夹杂的横杠
+      禁用: false
+      runOnEdit: true
+      findRegex: /(?<=\p{Script=Han})-(?=\p{Script=Han})/gu
+      replaceString: ""
+      trimStrings: []
+      placement:
+        - 2
+      substituteRegex: 0
+      minDepth: null
+      maxDepth: null
+      markdownOnly: false
+      promptOnly: false

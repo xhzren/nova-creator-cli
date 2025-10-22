@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>艾雅法拉 状态</title>
+    <style>
+        :root {
+            --primary-color: #f4a89a;
+            --secondary-color: #ffd6a5;
+            --text-dark: #2d2d2d;
+            --text-light: #666;
+            --border-color: rgba(244, 168, 154, 0.3);
+            --shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+            color: var(--text-dark);
+            padding: 8px;
+            background: transparent;
+        }
+
+        .game-ui {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+
+        @media (min-width: 768px) {
+            .game-ui {
+                max-width: 600px;
+            }
+        }
+
+        /* 顶部信息栏 - 游戏UI风格 */
+        .top-bar {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .top-item {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 10px 12px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+        }
+
+        .top-label {
+            font-size: 0.75em;
+            color: var(--text-light);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .top-value {
+            font-size: 0.9em;
+            color: var(--text-dark);
+            font-weight: 500;
+            line-height: 1.3;
+        }
+
+        @media (max-width: 480px) {
+            .top-bar {
+                grid-template-columns: 1fr;
+                gap: 6px;
+            }
+
+            .top-value {
+                font-size: 0.85em;
+            }
+        }
+
+        /* 角色属性区域 */
+        .character-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 10px;
+        }
+
+        @media (max-width: 480px) {
+            .character-stats {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.95);
+            border: 2px solid var(--border-color);
+            border-radius: 10px;
+            padding: 12px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(10px);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-label {
+            font-size: 0.8em;
+            color: var(--text-light);
+            font-weight: 600;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 0.95em;
+            color: var(--text-dark);
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        /* 好感度特殊样式 */
+        .stat-affection {
+            grid-column: 1 / -1;
+        }
+
+        .affection-display {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .affection-number {
+            font-size: 1.8em;
+            font-weight: 700;
+            color: var(--primary-color);
+            min-width: 60px;
+        }
+
+        .affection-desc {
+            font-size: 0.9em;
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 12px;
+            background: rgba(0, 0, 0, 0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+        }
+
+        .progress-bar-value {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 6px;
+            transition: width 0.4s ease;
+            box-shadow: 0 0 10px rgba(244, 168, 154, 0.5);
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 480px) {
+            body {
+                padding: 6px;
+            }
+
+            .stat-item {
+                padding: 10px;
+            }
+
+            .stat-label {
+                font-size: 0.75em;
+            }
+
+            .stat-value {
+                font-size: 0.88em;
+            }
+
+            .affection-number {
+                font-size: 1.5em;
+                min-width: 50px;
+            }
+
+            .affection-desc {
+                font-size: 0.85em;
+            }
+        }
+
+        @media (min-width: 768px) {
+            .character-stats {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-ui" id="game-ui">
+    <!-- 顶部游戏信息栏 -->
+    <div class="top-bar">
+        <div class="top-item">
+            <div class="top-label">⏰ 时间</div>
+            <div class="top-value" id="world-time">2025年04月15日 星期二 下午 03:30</div>
+        </div>
+        <div class="top-item">
+            <div class="top-label">📍 地点</div>
+            <div class="top-value" id="world-location">火山旅梦咖啡馆·吧台区</div>
+        </div>
+    </div>
+
+    <!-- 角色状态区域 -->
+    <div class="character-stats">
+        <!-- 好感度 -->
+        <div class="stat-item stat-affection">
+            <div class="stat-label">💖 好感度</div>
+            <div class="affection-display">
+                <span class="affection-number" id="eyja-affection">0</span>
+                <span class="affection-desc" id="eyja-affection-desc"></span>
+            </div>
+            <div class="progress-bar-container">
+                <div id="eyja-affection-bar" class="progress-bar-value" style="width: 0%;"></div>
+            </div>
+        </div>
+
+        <!-- 关系状态 -->
+        <div class="stat-item">
+            <div class="stat-label">👥 关系状态</div>
+            <div class="stat-value" id="eyja-relationship">初识·新入职的员工与老板</div>
+        </div>
+
+        <!-- 当前着装 -->
+        <div class="stat-item">
+            <div class="stat-label">👗 当前着装</div>
+            <div class="stat-value" id="eyja-outfit">经典的短款黑白女仆装</div>
+        </div>
+
+        <!-- 当前姿势 -->
+        <div class="stat-item">
+            <div class="stat-label">🧍 当前姿势</div>
+            <div class="stat-value" id="eyja-posture">站在吧台前,双手交握在身前</div>
+        </div>
+
+        <!-- 当前想法 -->
+        <div class="stat-item">
+            <div class="stat-label">💭 当前想法</div>
+            <div class="stat-value" id="eyja-thoughts">第一次在咖啡馆工作,有些紧张但也充满期待...</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function SafeGetValue(obj, path, defaultValue = "N/A") {
+        let keys = Array.isArray(path) ? path : path.split('.');
+        let current = obj;
+        for (let i = 0; i < keys.length; i++) {
+            if (current === undefined || current === null || typeof current !== 'object' || !current.hasOwnProperty(keys[i])) {
+                return defaultValue;
+            }
+            current = current[keys[i]];
+        }
+        if (current === undefined || current === null) {
+            return defaultValue;
+        }
+        if (Array.isArray(current)) {
+            if (current.length > 0) {
+                const actualValue = current[0];
+                if (typeof actualValue === 'boolean') {
+                    return actualValue;
+                }
+                return String(actualValue);
+            } else {
+                return defaultValue;
+            }
+        }
+        if (typeof current === 'boolean') {
+            return current;
+        }
+        return String(current);
+    }
+
+    function updateProgressBar(barId, valueMainId, valueDescId, rawValueFromCharacterData, min, max, color) {
+        const progressBar = document.getElementById(barId);
+        const valueMainDisplay = document.getElementById(valueMainId);
+        const valueDescDisplay = document.getElementById(valueDescId);
+        if (!valueMainDisplay) return;
+        let fullDisplayString = SafeGetValue({ temp: rawValueFromCharacterData }, 'temp', String(min));
+        let numericValue = min;
+        let descriptionText = "";
+        const descriptionMatch = String(fullDisplayString).match(/\((.+)\)$/);
+        if (descriptionMatch && descriptionMatch[1]) {
+            descriptionText = descriptionMatch[1];
+            fullDisplayString = String(fullDisplayString).substring(0, descriptionMatch.index).trim();
+        }
+        const valueMatch = String(fullDisplayString).match(/(-?\d+(\.\d+)?)(?=[^\d.]*$|->)/);
+        if (valueMatch) {
+            numericValue = parseFloat(valueMatch[1]);
+            const parts = String(fullDisplayString).split('->');
+            valueMainDisplay.innerText = parts.length > 1 ? parts[1].trim() : parts[0].trim();
+        } else if (!isNaN(parseFloat(fullDisplayString))) {
+            numericValue = parseFloat(fullDisplayString);
+            valueMainDisplay.innerText = fullDisplayString;
+        } else {
+            if (Array.isArray(rawValueFromCharacterData) && typeof rawValueFromCharacterData[0] === 'number') {
+                numericValue = rawValueFromCharacterData[0];
+                valueMainDisplay.innerText = String(numericValue);
+            } else if (typeof rawValueFromCharacterData === 'number' || typeof rawValueFromCharacterData === 'string') {
+                valueMainDisplay.innerText = String(rawValueFromCharacterData);
+            } else {
+                valueMainDisplay.innerText = SafeGetValue({ temp: rawValueFromCharacterData }, 'temp', String(min));
+            }
+        }
+        if (valueDescDisplay) {
+            valueDescDisplay.innerText = descriptionText ? `(${descriptionText})` : "";
+        }
+        if (progressBar) {
+            numericValue = Math.max(min, Math.min(max, numericValue));
+            const range = max - min;
+            const percentage = range === 0 ? (numericValue >= max ? 100 : 0) : ((numericValue - min) / range) * 100;
+            progressBar.style.width = `${Math.max(0, Math.min(100, percentage))}%`;
+            progressBar.style.backgroundColor = color ? color : 'var(--accent-highlight)';
+        }
+    }
+
+    async function initDisplay() {
+        try {
+            const messages = await getChatMessages(getCurrentMessageId());
+            if (!messages || messages.length === 0 || !messages[0].data) {
+                document.getElementById('status-card').innerHTML = "<p style='color:red; padding:10px;'>无法加载状态数据 (messages empty)</p>";
+                return;
+            }
+            const gameData = messages[0].data;
+            const characterData = gameData.stat_data;
+            if (!characterData) {
+                document.getElementById('status-card').innerHTML = "<p style='color:red; padding:10px;'>无法加载状态数据 (characterData missing)</p>";
+                return;
+            }
+
+            const worldTimeElem = document.getElementById('world-time');
+            if (worldTimeElem) {
+                worldTimeElem.innerText = SafeGetValue(characterData, '世界.当前时间', '2025年04月15日 星期二 下午 03:30');
+            }
+
+            const worldLocationElem = document.getElementById('world-location');
+            if (worldLocationElem) {
+                worldLocationElem.innerText = SafeGetValue(characterData, '世界.当前地点', '火山旅梦咖啡馆·吧台区');
+            }
+
+            if (characterData.hasOwnProperty('艾雅法拉')) {
+                updateProgressBar(
+                    'eyja-affection-bar',
+                    'eyja-affection',
+                    'eyja-affection-desc',
+                    SafeGetValue(characterData, '艾雅法拉.好感度'),
+                    0,
+                    100,
+                    'var(--accent-highlight)'
+                );
+
+                const relationshipElem = document.getElementById('eyja-relationship');
+                if (relationshipElem) {
+                    relationshipElem.innerText = SafeGetValue(characterData, '艾雅法拉.关系状态', '初识·新入职的员工与老板');
+                }
+
+                const outfitElem = document.getElementById('eyja-outfit');
+                if (outfitElem) {
+                    outfitElem.innerText = SafeGetValue(characterData, '艾雅法拉.当前着装', '经典的短款黑白女仆装');
+                }
+
+                const postureElem = document.getElementById('eyja-posture');
+                if (postureElem) {
+                    postureElem.innerText = SafeGetValue(characterData, '艾雅法拉.当前姿势', '站在吧台前,双手交握在身前');
+                }
+
+                const thoughtsElem = document.getElementById('eyja-thoughts');
+                if (thoughtsElem) {
+                    thoughtsElem.innerText = SafeGetValue(characterData, '艾雅法拉.当前想法', '第一次在咖啡馆工作,有些紧张但也充满期待...');
+                }
+            } else {
+                const affectionMain = document.getElementById('eyja-affection');
+                if (affectionMain) affectionMain.innerText = 'N/A';
+                const affectionBar = document.getElementById('eyja-affection-bar');
+                if (affectionBar) affectionBar.style.width = '0%';
+            }
+        } catch (error) {
+            document.getElementById('status-card').innerHTML = `<p style='color:red; padding:10px;'>状态栏加载出错: ${error.message}</p>`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', initDisplay);
+</script>
+</body>
+</html>

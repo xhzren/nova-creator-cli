@@ -1,0 +1,80 @@
+# 基础信息
+name: 火山旅梦
+creator: ""
+character_version: "1.0"
+
+# 主要字段映射
+fields:
+  description: 作品/火山旅梦/角色设定_艾雅法拉.xyaml
+  personality: ""
+  scenario: ""
+  first_mes: 作品/火山旅梦/开场白.md
+  mes_example: ""
+  creator_notes: ""
+  system_prompt: ""
+  post_history_instructions: ""
+
+# 扩展字段
+extensions:
+  talkativeness: "0.5"
+  fav: false
+  world: 火山旅梦
+  status_bar: 作品/火山旅梦/状态栏.html
+
+# 角色书配置
+character_book:
+  name: 火山旅梦
+  entries:
+    # [InitVar]初始化条目
+    - comment: "[InitVar]初始化"
+      content: 作品/火山旅梦/变量初始化_beta.xyaml
+      enabled: false
+      position: before_char
+      insertion_order: 100
+      depth: 4
+      role: 0
+
+    # 变量更新规则
+    - comment: "变量更新规则"
+      content: 作品/火山旅梦/变量更新规则.xyaml
+      enabled: true
+      position: at_depth
+      insertion_order: 1
+      depth: 1
+      role: 0
+
+    # 变量处理指令集
+    - comment: "变量处理指令集"
+      content: 作品/火山旅梦/变量处理指令集_beta.xyaml
+      enabled: true
+      position: at_depth
+      insertion_order: 2
+      depth: 1
+      role: 0
+
+    # 背景设定
+    - comment: "背景设定"
+      content: 作品/火山旅梦/背景设定.xyaml
+      enabled: true
+      position: before_char
+      insertion_order: 1
+      depth: 4
+      role: 0
+
+    # 玩家角色
+    - comment: "玩家角色_{{user}}"
+      content: 作品/火山旅梦/玩家角色_{{user}}.xyaml
+      enabled: true
+      position: before_char
+      insertion_order: 2
+      depth: 4
+      role: 0
+
+    # 艾雅法拉分阶段设定
+    - comment: "艾雅法拉分阶段设定"
+      content: 作品/火山旅梦/艾雅法拉分阶段设定.xyaml
+      enabled: true
+      position: after_char
+      insertion_order: 1
+      depth: 4
+      role: 0

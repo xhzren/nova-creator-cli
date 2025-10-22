@@ -1,0 +1,515 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>感觉剥夺陷阱 状态</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 6px;
+            background: transparent;
+            font-size: clamp(14px, 2vw, 16px);
+        }
+        .status-container {
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(8px);
+            max-width: 100%;
+        }
+
+        /* 顶部信息栏 */
+        .top-bar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 6px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+            font-size: clamp(13px, 1.8vw, 15px);
+            border-bottom: 2px solid rgba(255,255,255,0.2);
+        }
+        .top-bar-left {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .top-bar-right {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .top-item {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+        .top-label {
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+        .top-value {
+            font-weight: 600;
+        }
+
+        /* 单行布局 - 每行一个属性 */
+        .stats-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .stats-table tr {
+            display: flex;
+            flex-direction: column;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 6px 8px;
+            transition: background 0.2s ease;
+        }
+        .stats-table tr:hover {
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        /* 标签 */
+        .label-col {
+            color: #9ba9ff;
+            font-weight: 600;
+            font-size: 0.92em;
+            margin-bottom: 4px;
+            letter-spacing: 0.3px;
+        }
+
+        /* 数值 */
+        .value-col {
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 1em;
+            padding-left: 4px;
+        }
+
+        /* 带进度条的数值 */
+        .value-with-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .value-num {
+            min-width: 35px;
+            font-weight: 700;
+            font-size: 1.05em;
+        }
+        .value-desc {
+            font-size: 0.88em;
+            color: #999;
+            font-style: italic;
+            margin-left: 2px;
+        }
+        .mini-bar {
+            flex: 1;
+            height: 6px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 3px;
+            overflow: hidden;
+            min-width: 60px;
+        }
+        .mini-bar-fill {
+            height: 100%;
+            transition: width 0.5s ease;
+            border-radius: 3px;
+        }
+
+        /* 状态指示器 */
+        .status-badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.95em;
+            font-weight: 600;
+        }
+        .badge-inactive { background: rgba(158, 158, 158, 0.3); color: #9E9E9E; }
+        .badge-active { background: rgba(255, 87, 34, 0.3); color: #FF5722; }
+        .badge-observe { background: rgba(156, 39, 176, 0.3); color: #9C27B0; }
+        .badge-collected { background: rgba(233, 30, 99, 0.3); color: #E91E63; }
+
+        /* 分组标题 */
+        .group-header {
+            background: linear-gradient(90deg, rgba(102, 126, 234, 0.3) 0%, rgba(102, 126, 234, 0.1) 100%);
+            padding: 6px 10px;
+            font-size: 0.95em;
+            font-weight: 600;
+            color: #9ba9ff;
+            border-left: 3px solid #667eea;
+            letter-spacing: 0.5px;
+        }
+
+        /* 不同类型的分组样式 */
+        .group-status .stats-table tr {
+            background: rgba(156, 39, 176, 0.02);
+        }
+        .group-progress .stats-table tr {
+            background: rgba(76, 175, 80, 0.02);
+        }
+        .group-text .stats-table tr {
+            background: rgba(255, 255, 255, 0.01);
+        }
+        .group-body .stats-table tr {
+            background: rgba(233, 30, 99, 0.02);
+        }
+
+        /* 分组之间的分隔 */
+        .group-section {
+            margin-bottom: 2px;
+        }
+
+        /* 隐藏多余的单元格（单行布局不需要） */
+        .stats-table td:empty {
+            display: none;
+        }
+
+        /* 响应式调整 */
+        @media (max-width: 480px) {
+            body {
+                padding: 4px;
+                font-size: 13px;
+            }
+            .top-bar {
+                padding: 5px 8px;
+                font-size: 12px;
+            }
+            .group-header {
+                padding: 5px 8px;
+                font-size: 0.9em;
+            }
+            .stats-table tr {
+                padding: 5px 6px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="status-container" id="status-container">
+    <!-- 顶部信息栏 -->
+    <div class="top-bar">
+        <div class="top-bar-left">
+            <div class="top-item">
+                <span class="top-label">⏰</span>
+                <span class="top-value" id="world-time">第1日 下午 02:30</span>
+            </div>
+            <div class="top-item">
+                <span class="top-label">📍</span>
+                <span class="top-value" id="world-location">荒野小径</span>
+            </div>
+        </div>
+        <div class="top-bar-right">
+            <div class="top-item">
+                <span class="top-label">猎物:</span>
+                <span class="top-value" id="prey-name">未捕获</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- 状态开关类 -->
+    <div class="group-section group-status">
+        <div class="group-header">● 状态开关</div>
+        <table class="stats-table">
+            <tr>
+                <td class="label-col">捕获状态</td>
+                <td class="value-col">
+                    <span class="status-badge badge-inactive" id="prey-capture-status">未捕获</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="label-col">感官遮蔽</td>
+                <td class="value-col">
+                    <span class="status-badge badge-inactive" id="prey-sensory-block">未激活</span>
+                </td>
+            </tr>
+            <tr>
+                <td class="label-col">观察模式</td>
+                <td class="value-col">
+                    <span class="status-badge badge-inactive" id="prey-observation-mode">未激活</span>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 数值进度类 -->
+    <div class="group-section group-progress">
+        <div class="group-header">● 数值进度</div>
+        <table class="stats-table">
+            <tr>
+                <td class="label-col">理智度</td>
+                <td class="value-col">
+                    <div class="value-with-bar">
+                        <span class="value-num" id="prey-sanity">100</span>
+                        <div class="mini-bar">
+                            <div id="prey-sanity-bar" class="mini-bar-fill" style="width: 100%; background: #4CAF50;"></div>
+                        </div>
+                        <span class="value-desc" id="prey-sanity-desc"></span>
+                    </div>
+                </td>
+            </tr>
+            <tr>
+                <td class="label-col">淫乱度</td>
+                <td class="value-col">
+                    <div class="value-with-bar">
+                        <span class="value-num" id="prey-corruption">0</span>
+                        <div class="mini-bar">
+                            <div id="prey-corruption-bar" class="mini-bar-fill" style="width: 0%; background: #E91E63;"></div>
+                        </div>
+                        <span class="value-desc" id="prey-corruption-desc"></span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 一般信息类 -->
+    <div class="group-section group-text">
+        <div class="group-header">● 一般信息</div>
+        <table class="stats-table">
+            <tr>
+                <td class="label-col">身体状态</td>
+                <td class="value-col" id="prey-body">无</td>
+            </tr>
+            <tr>
+                <td class="label-col">当前着装</td>
+                <td class="value-col" id="prey-outfit">无</td>
+            </tr>
+            <tr>
+                <td class="label-col">当前姿势</td>
+                <td class="value-col" id="prey-pose">无</td>
+            </tr>
+            <tr>
+                <td class="label-col">当前想法</td>
+                <td class="value-col" id="prey-thought">无</td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- 身体部位类 -->
+    <div class="group-section group-body">
+        <div class="group-header">● 身体部位</div>
+        <table class="stats-table">
+            <tr>
+                <td class="label-col">胸部状态</td>
+                <td class="value-col" id="prey-chest">无</td>
+            </tr>
+            <tr>
+                <td class="label-col">小腹状态</td>
+                <td class="value-col" id="prey-belly">无</td>
+            </tr>
+            <tr>
+                <td class="label-col">阴道状态</td>
+                <td class="value-col" id="prey-vagina">无</td>
+            </tr>
+            <tr>
+                <td class="label-col">后穴状态</td>
+                <td class="value-col" id="prey-anus">无</td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<script>
+    function SafeGetValue(obj, path, defaultValue = "N/A") {
+        let keys = Array.isArray(path) ? path : path.split('.');
+        let current = obj;
+        for (let i = 0; i < keys.length; i++) {
+            if (current === undefined || current === null || typeof current !== 'object' || !current.hasOwnProperty(keys[i])) {
+                return defaultValue;
+            }
+            current = current[keys[i]];
+        }
+        if (current === undefined || current === null) {
+            return defaultValue;
+        }
+        if (Array.isArray(current)) {
+            if (current.length > 0) {
+                 const actualValue = current[0];
+                 if (typeof actualValue === 'boolean') {
+                     return actualValue;
+                 }
+                 return String(actualValue);
+            } else {
+                 return defaultValue;
+            }
+        }
+        if (typeof current === 'boolean') {
+            return current;
+        }
+        return String(current);
+    }
+
+    function updateProgressBar(barId, valueMainId, valueDescId, rawValueFromCharacterData, min, max, color) {
+        const progressBar = document.getElementById(barId);
+        const valueMainDisplay = document.getElementById(valueMainId);
+        const valueDescDisplay = document.getElementById(valueDescId);
+        if (!valueMainDisplay) return;
+        let fullDisplayString = SafeGetValue({ temp: rawValueFromCharacterData }, 'temp', String(min));
+        let numericValue = min;
+        let descriptionText = "";
+        const descriptionMatch = String(fullDisplayString).match(/\((.+)\)$/);
+        if (descriptionMatch && descriptionMatch[1]) {
+            descriptionText = descriptionMatch[1];
+            fullDisplayString = String(fullDisplayString).substring(0, descriptionMatch.index).trim();
+        }
+        const valueMatch = String(fullDisplayString).match(/(-?\d+(\.\d+)?)(?=[^\d.]*$|->)/);
+        if (valueMatch) {
+            numericValue = parseFloat(valueMatch[1]);
+            const parts = String(fullDisplayString).split('->');
+            valueMainDisplay.innerText = parts.length > 1 ? parts[1].trim() : parts[0].trim();
+        } else if (!isNaN(parseFloat(fullDisplayString))) {
+            numericValue = parseFloat(fullDisplayString);
+            valueMainDisplay.innerText = fullDisplayString;
+        } else {
+            if (Array.isArray(rawValueFromCharacterData) && typeof rawValueFromCharacterData[0] === 'number') {
+                numericValue = rawValueFromCharacterData[0];
+                valueMainDisplay.innerText = String(numericValue);
+            } else if (typeof rawValueFromCharacterData === 'number' || typeof rawValueFromCharacterData === 'string') {
+                valueMainDisplay.innerText = String(rawValueFromCharacterData);
+            } else {
+                valueMainDisplay.innerText = SafeGetValue({ temp: rawValueFromCharacterData }, 'temp', String(min));
+            }
+        }
+        if (valueDescDisplay) {
+            valueDescDisplay.innerText = descriptionText || "";
+        }
+        if (progressBar) {
+            numericValue = Math.max(min, Math.min(max, numericValue));
+            const range = max - min;
+            const percentage = range === 0 ? (numericValue >= max ? 100 : 0) : ((numericValue - min) / range) * 100;
+            progressBar.style.width = `${Math.max(0, Math.min(100, percentage))}%`;
+            if (color) {
+                progressBar.style.background = color;
+            }
+        }
+    }
+
+    async function initDisplay() {
+        try {
+            const messages = await getChatMessages(getCurrentMessageId());
+            if (!messages || messages.length === 0 || !messages[0].data) {
+                document.getElementById('status-container').innerHTML = "<p style='color:red; padding:10px;'>无法加载状态数据 (messages empty)</p>";
+                return;
+            }
+            const gameData = messages[0].data;
+            const characterData = gameData.stat_data;
+            if (!characterData) {
+                document.getElementById('status-container').innerHTML = "<p style='color:red; padding:10px;'>无法加载状态数据 (characterData missing)</p>";
+                return;
+            }
+
+            // 更新顶部标题栏信息
+            const worldTimeEl = document.getElementById('world-time');
+            if (worldTimeEl) worldTimeEl.innerText = SafeGetValue(characterData, '世界.当前时间', '第1日 下午 02:30');
+
+            const worldLocationEl = document.getElementById('world-location');
+            if (worldLocationEl) worldLocationEl.innerText = SafeGetValue(characterData, '世界.当前地点', '荒野小径');
+
+            // 更新猎物基本信息
+            const preyNameEl = document.getElementById('prey-name');
+            if (preyNameEl) preyNameEl.innerText = SafeGetValue(characterData, '猎物.名称', '未捕获');
+
+            // 更新捕获状态
+            const captureStatusEl = document.getElementById('prey-capture-status');
+            if (captureStatusEl) {
+                const captureStatus = SafeGetValue(characterData, '猎物.捕获状态', '未捕获');
+                captureStatusEl.innerText = captureStatus;
+                // 根据不同状态设置徽章样式
+                captureStatusEl.className = 'status-badge';
+                if (captureStatus === '未捕获') {
+                    captureStatusEl.classList.add('badge-inactive');
+                } else if (captureStatus === '已捕获') {
+                    captureStatusEl.classList.add('badge-active');
+                } else if (captureStatus === '观察中') {
+                    captureStatusEl.classList.add('badge-observe');
+                } else if (captureStatus === '已收藏') {
+                    captureStatusEl.classList.add('badge-collected');
+                }
+            }
+
+            // 更新理智度
+            updateProgressBar(
+                'prey-sanity-bar',
+                'prey-sanity',
+                'prey-sanity-desc',
+                SafeGetValue(characterData, '猎物.理智度'),
+                0,
+                100,
+                '#4CAF50'
+            );
+
+            // 更新淫乱度
+            updateProgressBar(
+                'prey-corruption-bar',
+                'prey-corruption',
+                'prey-corruption-desc',
+                SafeGetValue(characterData, '猎物.淫乱度'),
+                0,
+                100,
+                '#E91E63'
+            );
+
+            // 更新感官遮蔽
+            const sensoryBlockEl = document.getElementById('prey-sensory-block');
+            if (sensoryBlockEl) {
+                const blockStatus = SafeGetValue(characterData, '猎物.感官遮蔽开关', false);
+                const isActive = blockStatus === true || blockStatus === 'true';
+                sensoryBlockEl.innerText = isActive ? '已激活' : '未激活';
+                sensoryBlockEl.className = 'status-badge';
+                sensoryBlockEl.classList.add(isActive ? 'badge-active' : 'badge-inactive');
+            }
+
+            // 更新观察模式
+            const observationModeEl = document.getElementById('prey-observation-mode');
+            if (observationModeEl) {
+                const obsMode = SafeGetValue(characterData, '猎物.观察模式', false);
+                const isActive = obsMode === true || obsMode === 'true';
+                observationModeEl.innerText = isActive ? '已激活' : '未激活';
+                observationModeEl.className = 'status-badge';
+                observationModeEl.classList.add(isActive ? 'badge-observe' : 'badge-inactive');
+            }
+
+            // 更新身体状态
+            const preyBodyEl = document.getElementById('prey-body');
+            if (preyBodyEl) preyBodyEl.innerText = SafeGetValue(characterData, '猎物.身体状态', '无');
+
+            // 更新当前着装
+            const preyOutfitEl = document.getElementById('prey-outfit');
+            if (preyOutfitEl) preyOutfitEl.innerText = SafeGetValue(characterData, '猎物.当前着装', '无');
+
+            // 更新当前姿势
+            const preyPoseEl = document.getElementById('prey-pose');
+            if (preyPoseEl) preyPoseEl.innerText = SafeGetValue(characterData, '猎物.当前姿势', '无');
+
+            // 更新当前想法
+            const preyThoughtEl = document.getElementById('prey-thought');
+            if (preyThoughtEl) preyThoughtEl.innerText = SafeGetValue(characterData, '猎物.当前想法', '无');
+
+            // 更新身体部位状态
+            const preyChestEl = document.getElementById('prey-chest');
+            if (preyChestEl) preyChestEl.innerText = SafeGetValue(characterData, '猎物.胸部状态', '无');
+
+            const preyBellyEl = document.getElementById('prey-belly');
+            if (preyBellyEl) preyBellyEl.innerText = SafeGetValue(characterData, '猎物.小腹状态', '无');
+
+            const preyVaginaEl = document.getElementById('prey-vagina');
+            if (preyVaginaEl) preyVaginaEl.innerText = SafeGetValue(characterData, '猎物.阴道状态', '无');
+
+            const preyAnusEl = document.getElementById('prey-anus');
+            if (preyAnusEl) preyAnusEl.innerText = SafeGetValue(characterData, '猎物.后穴状态', '无');
+
+        } catch (error) {
+            document.getElementById('status-container').innerHTML = `<p style='color:red; padding:10px;'>状态栏加载出错: ${error.message}</p>`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', initDisplay);
+</script>
+</body>
+</html>

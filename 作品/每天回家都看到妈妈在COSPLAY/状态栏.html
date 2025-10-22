@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每天回家都看到妈妈在COSPLAY 状态</title>
+    <style>
+        :root {
+            --primary: #ff6b9d;
+            --accent-pink: #ff85a2;
+            --accent-purple: #c879ff;
+            --surface: #fff5f8;
+            --surface-strong: #ffffff;
+            --border: rgba(255, 107, 157, 0.15);
+            --text-main: #2f2435;
+            --text-muted: #8b7790;
+        }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: "Microsoft YaHei", "PingFang SC", "Hiragino Sans GB", sans-serif;
+            background: transparent;
+            color: var(--text-main);
+            padding: 14px;
+        }
+        .status-card {
+            max-width: 960px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 18px 40px rgba(255, 107, 157, 0.15);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        .status-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 12px;
+            width: 100%;
+        }
+        .status-title h1 {
+            font-size: 1.6rem;
+            letter-spacing: 0.04em;
+            color: var(--primary);
+        }
+        .status-title {
+            flex: 1;
+            min-width: 260px;
+        }
+        .title-subrow {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 6px;
+        }
+        .status-subtitle {
+            font-size: 0.95rem;
+            color: var(--text-muted);
+            margin: 0;
+        }
+        .status-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 12px;
+            min-width: 240px;
+        }
+        .toggle-btn {
+            padding: 8px 18px;
+            border-radius: 999px;
+            border: none;
+            background: linear-gradient(135deg, #c879ff 0%, #ff6b9d 100%);
+            color: #fff;
+            font-size: 0.9rem;
+            font-weight: 600;
+            letter-spacing: 0.04em;
+            cursor: pointer;
+            box-shadow: 0 10px 24px rgba(200, 121, 255, 0.22);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, opacity 0.18s ease;
+        }
+        .toggle-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 16px 30px rgba(200, 121, 255, 0.28);
+        }
+        .toggle-btn:active {
+            transform: translateY(0);
+            opacity: 0.85;
+        }
+        .status-card.social-mode .toggle-btn {
+            background: linear-gradient(135deg, #ff8aa7 0%, #ffc371 100%);
+            box-shadow: 0 10px 24px rgba(255, 138, 167, 0.24);
+        }
+        .title-subrow .toggle-btn {
+            flex-shrink: 0;
+            margin-left: auto;
+        }
+        .view-hidden {
+            display: none !important;
+        }
+        .status-card.social-mode {
+            background: linear-gradient(160deg, rgba(255, 255, 255, 0.96) 0%, rgba(255, 245, 248, 0.98) 45%, rgba(255, 238, 222, 0.96) 100%);
+        }
+        .status-card.social-mode .status-title h1 {
+            color: var(--accent-purple);
+        }
+        .status-card.social-mode .status-subtitle {
+            color: var(--text-muted);
+        }
+        .status-card.social-mode .status-meta {
+            display: none;
+        }
+        .meta-item {
+            background: var(--surface);
+            border-radius: 14px;
+            border: 1px solid #ffe3ec;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .meta-label {
+            font-size: 0.78rem;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .meta-value {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-main);
+            word-break: break-word;
+        }
+        .panel-block {
+            background: var(--surface);
+            border-radius: 16px;
+            border: 1px solid #ffe3ec;
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+        }
+        .panel-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 0.04em;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+        }
+        .info-card {
+            background: var(--surface-strong);
+            border-radius: 12px;
+            border: 1px solid #ffe8f0;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .info-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            letter-spacing: 0.06em;
+        }
+        .info-value {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-main);
+            word-break: break-word;
+            line-height: 1.5;
+        }
+        .text-group {
+            display: grid;
+            gap: 12px;
+        }
+        .text-item {
+            background: var(--surface-strong);
+            border-radius: 12px;
+            border: 1px solid #ffe8f0;
+            padding: 12px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .info-text {
+            color: var(--text-main);
+            line-height: 1.6;
+            font-size: 0.95rem;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .cos-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 4px 12px;
+            border-radius: 999px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+        }
+        .cos-badge-active {
+            background: linear-gradient(135deg, #ff6b9d 0%, #ff85a2 100%);
+            color: #fff;
+        }
+        .cos-badge-inactive {
+            background: linear-gradient(135deg, #d0d0d0 0%, #e0e0e0 100%);
+            color: #666;
+        }
+        .error-tip {
+            color: #b83232;
+            background: #ffe9e9;
+            border: 1px solid #ffc9c9;
+            border-radius: 14px;
+            padding: 16px;
+            line-height: 1.6;
+        }
+        .social-panel {
+            gap: 12px;
+        }
+        .social-top {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 16px;
+        }
+        .social-account {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        .social-account-nickname {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 0.02em;
+        }
+        .social-id {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+        .social-bio {
+            font-size: 0.95rem;
+            color: var(--text-main);
+            line-height: 1.6;
+            white-space: pre-wrap;
+        }
+        .social-stats {
+            display: flex;
+            gap: 16px;
+        }
+        .social-stat {
+            min-width: 96px;
+            padding: 10px 14px;
+            border-radius: 14px;
+            border: 1px solid rgba(200, 121, 255, 0.25);
+            background: rgba(200, 121, 255, 0.06);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .stat-label {
+            font-size: 0.75rem;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .stat-value {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--accent-purple);
+        }
+        .social-feed {
+            display: grid;
+            gap: 16px;
+        }
+        .social-post {
+            background: var(--surface-strong);
+            border-radius: 16px;
+            border: 1px solid rgba(200, 121, 255, 0.18);
+            padding: 16px 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .social-post-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            gap: 12px;
+        }
+        .social-post-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        .social-timestamp {
+            font-size: 0.82rem;
+            color: var(--text-muted);
+        }
+        .social-body {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-main);
+            white-space: pre-wrap;
+        }
+        .attachment-list {
+            display: grid;
+            gap: 10px;
+        }
+        .attachment-item {
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px dashed rgba(200, 121, 255, 0.26);
+            background: rgba(200, 121, 255, 0.06);
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+        }
+        .attachment-type {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #ffffff;
+            background: linear-gradient(135deg, #ff85a2 0%, #c879ff 100%);
+            border-radius: 999px;
+            padding: 4px 10px;
+            white-space: nowrap;
+        }
+        .attachment-desc {
+            font-size: 0.9rem;
+            color: var(--text-main);
+            line-height: 1.5;
+        }
+        .social-metrics {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .social-metrics span {
+            font-size: 0.88rem;
+            color: var(--primary);
+            background: rgba(255, 133, 162, 0.14);
+            padding: 6px 14px;
+            border-radius: 999px;
+            font-weight: 600;
+        }
+        .social-comments {
+            border-top: 1px solid rgba(200, 121, 255, 0.18);
+            padding-top: 12px;
+            display: grid;
+            gap: 10px;
+        }
+        .comments-title {
+            font-size: 0.8rem;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .comment-item {
+            background: rgba(255, 107, 157, 0.05);
+            border-radius: 10px;
+            padding: 10px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .comment-author {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: var(--primary);
+        }
+        .comment-content {
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--text-main);
+        }
+        .empty-tip {
+            text-align: center;
+            padding: 36px 18px;
+            color: var(--text-muted);
+            border-radius: 16px;
+            border: 1px dashed rgba(200, 121, 255, 0.24);
+            background: rgba(200, 121, 255, 0.04);
+        }
+        @media (max-width: 640px) {
+            body {
+                padding: 10px;
+            }
+            .status-card {
+                padding: 16px;
+                border-radius: 18px;
+            }
+            .status-meta {
+                width: 100%;
+            }
+            .title-subrow {
+                width: 100%;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .toggle-btn {
+                width: 100%;
+                text-align: center;
+            }
+            .title-subrow .toggle-btn {
+                margin-left: 0;
+            }
+            .social-stats {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="status-card" id="status-card">
+    <header class="status-header">
+        <div class="status-title">
+            <h1>每天回家都看到妈妈在COSPLAY</h1>
+            <div class="title-subrow">
+                <p class="status-subtitle">夏川星来的日常</p>
+                <button class="toggle-btn" id="toggle-view-btn" type="button" data-mode="status">查看动态</button>
+            </div>
+        </div>
+        <div class="status-meta">
+            <div class="meta-item">
+                <span class="meta-label">当前时间</span>
+                <span class="meta-value" id="current-time">N/A</span>
+            </div>
+            <div class="meta-item">
+                <span class="meta-label">当前地点</span>
+                <span class="meta-value" id="current-location">N/A</span>
+            </div>
+        </div>
+    </header>
+
+    <div id="status-view">
+        <section class="panel-block">
+            <h3 class="panel-title">夏川星来</h3>
+            <div class="text-group">
+                <div class="text-item">
+                    <span class="info-label">当前着装</span>
+                    <p class="info-text" id="seira-outfit">N/A</p>
+                </div>
+                <div class="text-item">
+                    <span class="info-label">当前姿势</span>
+                    <p class="info-text" id="seira-pose">N/A</p>
+                </div>
+                <div class="text-item">
+                    <span class="info-label">当前想法</span>
+                    <p class="info-text" id="seira-thoughts">N/A</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="panel-block">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <h3 class="panel-title">COSPLAY状态</h3>
+                <span id="cos-status">N/A</span>
+            </div>
+            <div class="text-group">
+                <div class="text-item">
+                    <span class="info-label">角色设定</span>
+                    <p class="info-text" id="cos-character">N/A</p>
+                </div>
+                <div class="text-item">
+                    <span class="info-label">服装设定</span>
+                    <p class="info-text" id="cos-costume">N/A</p>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <div id="social-view" class="view-hidden">
+        <section class="panel-block social-panel">
+            <div class="social-top">
+                <div class="social-account">
+                    <h3 class="social-account-nickname">夏川星来Official</h3>
+                    <p class="social-id">@seira_cos · 专业COSER</p>
+                </div>
+                <div class="social-stats">
+                    <div class="social-stat">
+                        <span class="stat-label">粉丝</span>
+                        <span class="stat-value">126,000</span>
+                    </div>
+                    <div class="social-stat">
+                        <span class="stat-label">关注</span>
+                        <span class="stat-value">218</span>
+                    </div>
+                </div>
+            </div>
+            <p class="social-bio">让二次元在三次元绽放✨ 专业COSER | 服装道具自制 | 每天都是新角色的一天～</p>
+        </section>
+
+        <section class="panel-block">
+            <h3 class="panel-title">最新动态</h3>
+            <div id="social-feed" class="social-feed">
+                <div class="empty-tip">暂无动态</div>
+            </div>
+        </section>
+    </div>
+</div>
+
+<script>
+    function SafeGetValue(obj, path, defaultValue = "N/A") {
+        const keys = Array.isArray(path) ? path : path.split('.');
+        let current = obj;
+        for (let i = 0; i < keys.length; i++) {
+            if (current === undefined || current === null || typeof current !== 'object' || !Object.prototype.hasOwnProperty.call(current, keys[i])) {
+                return defaultValue;
+            }
+            current = current[keys[i]];
+        }
+        if (current === undefined || current === null) {
+            return defaultValue;
+        }
+        if (Array.isArray(current)) {
+            const filtered = current.filter(item => typeof item !== 'string' || !item.startsWith('$__META'));
+            if (filtered.length > 0) {
+                const actualValue = filtered[0];
+                if (typeof actualValue === 'boolean' || typeof actualValue === 'number') {
+                    return actualValue;
+                }
+                return String(actualValue);
+            }
+            return defaultValue;
+        }
+        if (typeof current === 'boolean' || typeof current === 'number' || typeof current === 'string') {
+            return current;
+        }
+        return JSON.stringify(current);
+    }
+
+    function filterObjectArray(value) {
+        if (!Array.isArray(value)) return [];
+        return value.filter(item => item && typeof item === 'object' && !Array.isArray(item));
+    }
+
+    function formatNumber(value, fallback = '0') {
+        const num = Number(value);
+        if (Number.isFinite(num)) {
+            return num.toLocaleString('zh-CN');
+        }
+        return fallback;
+    }
+
+    const statusCard = document.getElementById('status-card');
+    const statusView = document.getElementById('status-view');
+    const socialView = document.getElementById('social-view');
+    const toggleBtn = document.getElementById('toggle-view-btn');
+    const statusSubtitleElem = document.querySelector('.status-subtitle');
+
+    const defaultSubtitle = statusSubtitleElem ? statusSubtitleElem.innerText : '夏川星来的日常';
+    const socialSubtitle = 'Cosmix · 次元社区';
+    const socialAccountName = '夏川星来Official';
+    let cachedCharacterData = null;
+
+    function renderStatus(characterData) {
+        const timeElem = document.getElementById('current-time');
+        if (timeElem) timeElem.innerText = SafeGetValue(characterData, '世界.当前时间');
+
+        const locationElem = document.getElementById('current-location');
+        if (locationElem) locationElem.innerText = SafeGetValue(characterData, '世界.当前地点');
+
+        const seiraOutfit = document.getElementById('seira-outfit');
+        if (seiraOutfit) seiraOutfit.innerText = SafeGetValue(characterData, '夏川星来.当前着装');
+
+        const seiraPose = document.getElementById('seira-pose');
+        if (seiraPose) seiraPose.innerText = SafeGetValue(characterData, '夏川星来.当前姿势');
+
+        const seiraThoughts = document.getElementById('seira-thoughts');
+        if (seiraThoughts) seiraThoughts.innerText = SafeGetValue(characterData, '夏川星来.当前想法');
+
+        const cosStatusValue = SafeGetValue(characterData, 'COSPLAY.状态开关', false);
+        const cosStatusElem = document.getElementById('cos-status');
+        if (cosStatusElem) {
+            const isActive = cosStatusValue === true || cosStatusValue === 'true';
+            const badgeClass = isActive ? 'cos-badge-active' : 'cos-badge-inactive';
+            const statusText = isActive ? 'ON' : 'OFF';
+            cosStatusElem.innerHTML = `<span class="cos-badge ${badgeClass}">${statusText}</span>`;
+        }
+
+        const cosCharacter = document.getElementById('cos-character');
+        if (cosCharacter) cosCharacter.innerText = SafeGetValue(characterData, 'COSPLAY.角色设定');
+
+        const cosCostume = document.getElementById('cos-costume');
+        if (cosCostume) cosCostume.innerText = SafeGetValue(characterData, 'COSPLAY.服装设定');
+    }
+
+    function renderSocial(characterData) {
+        if (!socialView) return;
+
+        const feedElem = document.getElementById('social-feed');
+        if (!feedElem) return;
+
+        const rawPosts = Array.isArray(characterData?.['社交动态']) ? characterData['社交动态'] : [];
+        const posts = rawPosts.filter(item => item && typeof item === 'object' && !Array.isArray(item));
+
+        feedElem.innerHTML = '';
+        if (posts.length === 0) {
+            feedElem.innerHTML = "<div class='empty-tip'>暂无动态</div>";
+            return;
+        }
+
+        posts
+            .slice()
+            .reverse()
+            .forEach(post => {
+                const postElem = document.createElement('article');
+                postElem.className = 'social-post';
+
+                const header = document.createElement('div');
+                header.className = 'social-post-header';
+
+                const title = document.createElement('div');
+                title.className = 'social-post-title';
+                title.innerText = socialAccountName;
+
+                const timestamp = document.createElement('time');
+                timestamp.className = 'social-timestamp';
+                timestamp.innerText = post?.['发布时间'] || '时间未知';
+
+                header.appendChild(title);
+                header.appendChild(timestamp);
+                postElem.appendChild(header);
+
+                const body = document.createElement('p');
+                body.className = 'social-body';
+                body.innerText = post?.['正文'] || '（暂无正文）';
+                postElem.appendChild(body);
+
+                const attachments = filterObjectArray(post?.['附件']);
+                if (attachments.length > 0) {
+                    const attachmentList = document.createElement('div');
+                    attachmentList.className = 'attachment-list';
+
+                    attachments.forEach(att => {
+                        const item = document.createElement('div');
+                        item.className = 'attachment-item';
+
+                        const typeBadge = document.createElement('span');
+                        typeBadge.className = 'attachment-type';
+                        typeBadge.innerText = att?.['类型'] || '附件';
+
+                        const desc = document.createElement('p');
+                        desc.className = 'attachment-desc';
+                        desc.innerText = att?.['描述'] || '（暂无描述）';
+
+                        item.appendChild(typeBadge);
+                        item.appendChild(desc);
+                        attachmentList.appendChild(item);
+                    });
+
+                    postElem.appendChild(attachmentList);
+                }
+
+                const rewardCount = post?.['打赏人数'] || 0;
+                const rewardTotal = post?.['打赏金额'] || 0;
+
+                const metrics = document.createElement('div');
+                metrics.className = 'social-metrics';
+
+                const likeSpan = document.createElement('span');
+                likeSpan.innerText = `👍 ${formatNumber(post?.['点赞数'], '0')}`;
+                metrics.appendChild(likeSpan);
+
+                const rewardSpan = document.createElement('span');
+                rewardSpan.innerText = rewardCount > 0
+                    ? `🎁 ${formatNumber(rewardCount)}人 · ¥${formatNumber(rewardTotal, '0')}`
+                    : '🎁 暂无打赏';
+                metrics.appendChild(rewardSpan);
+
+                postElem.appendChild(metrics);
+
+                const comments = filterObjectArray(post?.['评论列表']);
+                if (comments.length > 0) {
+                    const commentsWrap = document.createElement('div');
+                    commentsWrap.className = 'social-comments';
+
+                    const commentsTitle = document.createElement('div');
+                    commentsTitle.className = 'comments-title';
+                    commentsTitle.innerText = '热门评论';
+                    commentsWrap.appendChild(commentsTitle);
+
+                    comments.forEach(comment => {
+                        const commentItem = document.createElement('div');
+                        commentItem.className = 'comment-item';
+
+                        const author = document.createElement('span');
+                        author.className = 'comment-author';
+                        author.innerText = comment?.['评论人'] || '匿名粉丝';
+
+                        const content = document.createElement('p');
+                        content.className = 'comment-content';
+                        content.innerText = comment?.['内容'] || '（暂无内容）';
+
+                        commentItem.appendChild(author);
+                        commentItem.appendChild(content);
+                        commentsWrap.appendChild(commentItem);
+                    });
+
+                    postElem.appendChild(commentsWrap);
+                }
+
+                feedElem.appendChild(postElem);
+            });
+    }
+
+    function switchView(showSocial) {
+        if (!statusCard || !statusView || !socialView || !toggleBtn) return;
+        if (showSocial) {
+            statusView.classList.add('view-hidden');
+            socialView.classList.remove('view-hidden');
+            statusCard.classList.add('social-mode');
+            toggleBtn.textContent = '返回状态栏';
+            toggleBtn.setAttribute('data-mode', 'social');
+            if (statusSubtitleElem) statusSubtitleElem.innerText = socialSubtitle;
+            if (cachedCharacterData) {
+                renderSocial(cachedCharacterData);
+            }
+        } else {
+            statusView.classList.remove('view-hidden');
+            socialView.classList.add('view-hidden');
+            statusCard.classList.remove('social-mode');
+            toggleBtn.textContent = '查看动态';
+            toggleBtn.setAttribute('data-mode', 'status');
+            if (statusSubtitleElem) statusSubtitleElem.innerText = defaultSubtitle;
+        }
+    }
+
+    switchView(false);
+
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            const currentMode = toggleBtn.getAttribute('data-mode');
+            switchView(currentMode !== 'social');
+        });
+    }
+
+    async function initDisplay() {
+        try {
+            const messages = await getChatMessages(getCurrentMessageId());
+            if (!messages || messages.length === 0 || !messages[0].data) {
+                statusCard.innerHTML = "<div class='error-tip'>无法加载状态数据 (messages empty)</div>";
+                return;
+            }
+            const gameData = messages[0].data;
+            const characterData = gameData?.stat_data;
+            if (!characterData) {
+                statusCard.innerHTML = "<div class='error-tip'>无法加载状态数据 (characterData missing)</div>";
+                return;
+            }
+
+            cachedCharacterData = characterData;
+            renderStatus(characterData);
+            renderSocial(characterData);
+
+            if (toggleBtn && toggleBtn.getAttribute('data-mode') === 'social') {
+                switchView(true);
+            }
+        } catch (error) {
+            statusCard.innerHTML = `<div class='error-tip'>状态栏加载出错: ${error.message}</div>`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', initDisplay);
+</script>
+</body>
+</html>

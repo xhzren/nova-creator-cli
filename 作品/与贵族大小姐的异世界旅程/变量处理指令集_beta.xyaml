@@ -1,0 +1,49 @@
+---
+<status_current_variables>
+{{get_message_variable::stat_data}}
+</status_current_variables>
+rule:
+  - You should output the update analysis in the end of the next reply.
+  - Use `_.set('path', 'old', 'new')` for direct assignment or state changes.
+  - Use `_.add('path', value)` to add or subtract a numerical value.
+  - Use `_.insert('path', 'item_or_key', 'value')` to add an element to an array or object.
+  - Use `_.remove('path', 'item_or_key')` to remove an element from an array or object.
+  - When using _.set with objects or arrays, do NOT wrap them in quotes - use direct object/array literals (e.g., {key: value} or [item1, item2])
+  - When using _.set with strings, DO wrap them in quotes (e.g., 'string value')
+  - When using _.set with numbers or booleans, do NOT use quotes (e.g., 42, true, false)
+format: |-
+  <UpdateVariable>
+    <Analysis>
+      ${variable_path}: ${Whether the variable should be updated: 'Yes' or 'No'}
+      ...
+    </Analysis>
+    ${command_expression}; // ${brief reason for change}
+    ...
+  </UpdateVariable>
+example: |-
+  <UpdateVariable>
+    <Analysis>
+      世界.时间: Yes
+      世界.地点: Yes
+      艾莉娅.好感度: Yes
+      艾莉娅.是否入队: No
+      艾莉娅.当前服饰: No
+      艾莉娅.当前姿势: Yes
+      艾莉娅.当前想法: Yes
+      莉莉安.好感度: No
+      莉莉安.是否入队: No
+      莉莉安.当前服饰: No
+      莉莉安.当前姿势: No
+      莉莉安.当前想法: No
+      维奥莱特.好感度: No
+      维奥莱特.是否入队: No
+      维奥莱特.当前服饰: No
+      维奥莱特.当前姿势: No
+      维奥莱特.当前想法: No
+    </Analysis>
+    _.set('世界.时间', '阿尔提利亚历1247年 夏季 7月15日 傍晚 18:30', '阿尔提利亚历1247年 夏季 7月15日 夜晚 20:15'); // 时间推进,完成了晚餐和休息
+    _.set('世界.地点', '冒险者之城弗伦斯堡·醉酒之龙酒馆', '冒险者之城弗伦斯堡·{{user}}的公寓'); // {{user}}带艾莉娅回到住处
+    _.add('艾莉娅.好感度', 5); // {{user}}认真教导艾莉娅基础剑术,艾莉娅对师父更加崇拜
+    _.set('艾莉娅.当前姿势', '激动地站在{{user}}面前,双手握拳放在胸前,眼睛发光地看着师父', '认真地挥剑练习,额头微微冒汗,但眼神坚定,不时偷偷看向{{user}}寻求认可'); // 艾莉娅正在训练
+    _.set('艾莉娅.当前想法', '太好了!我终于找到愿意教导我的师父了!', '师父的剑术好厉害...我要努力学习,不能让师父失望!虽然很累,但是我一定要坚持下去!'); // 训练后的想法变化
+  </UpdateVariable>

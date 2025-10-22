@@ -1,0 +1,86 @@
+# 角色卡配置文件 - 盐与星星
+# 使用方法: node build-card.js 盐与星星.yaml
+
+# 基础信息
+name: 几何
+creator: ""
+character_version: "1.0"
+
+# 主要字段映射(空字符串表示该字段为空)
+fields:
+  description: 作品/盐与星星/角色设定_几何.xyaml
+  personality: ""
+  scenario: ""
+  first_mes: 作品/盐与星星/开场白.md
+  mes_example: ""
+  creator_notes: ""
+  system_prompt: ""
+  post_history_instructions: ""
+
+# 扩展字段
+extensions:
+  talkativeness: "0.5"
+  fav: false
+  world: 盐与星星
+
+  # 状态栏文件路径
+  status_bar: 作品/盐与星星/状态栏.html
+
+# 角色书配置
+character_book:
+  name: 盐与星星
+
+  entries:
+    # [InitVar]初始化条目 - 保持关闭状态
+    - comment: "[InitVar]初始化"
+      content: 作品/盐与星星/变量初始化_beta.xyaml
+      enabled: false
+      position: before_char
+      insertion_order: 100
+      depth: 4
+      role: 0
+
+    # 变量更新规则 - 永久、@D系统、深度1、顺序1
+    - comment: "变量更新规则"
+      content: 作品/盐与星星/变量更新规则.xyaml
+      enabled: true
+      position: at_depth
+      insertion_order: 1
+      depth: 1
+      role: 0
+
+    # 变量处理指令集Beta版 - 永久、@D系统、深度1、顺序2
+    - comment: "变量处理指令集"
+      content: 作品/盐与星星/变量处理指令集_beta.xyaml
+      enabled: true
+      position: at_depth
+      insertion_order: 2
+      depth: 1
+      role: 0
+
+    # 背景设定 - 永久、角色定义之前、顺序1
+    - comment: "背景设定"
+      content: 作品/盐与星星/背景设定.xyaml
+      enabled: true
+      position: before_char
+      insertion_order: 1
+      depth: 4
+      role: 0
+
+    # 玩家角色 - 永久、角色定义之前、顺序2
+    - comment: "玩家角色_{{user}}"
+      content: 作品/盐与星星/玩家角色_{{user}}.xyaml
+      enabled: true
+      position: before_char
+      insertion_order: 2
+      depth: 4
+      role: 0
+
+    # 分阶段角色设定 - 永久、角色定义之后、顺序1
+    - comment: "几何分阶段设定"
+      content: 作品/盐与星星/几何分阶段设定.xyaml
+      enabled: true
+      position: after_char
+      insertion_order: 1
+      depth: 4
+      role: 0

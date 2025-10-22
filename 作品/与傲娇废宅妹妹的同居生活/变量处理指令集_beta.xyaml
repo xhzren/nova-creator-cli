@@ -1,0 +1,38 @@
+---
+<status_current_variables>
+{{get_message_variable::stat_data}}
+</status_current_variables>
+rule:
+  - You should output the update analysis in the end of the next reply.
+  - Use `_.set('path', 'old', 'new')` for direct assignment or state changes.
+  - Use `_.add('path', value)` to add or subtract a numerical value.
+  - Use `_.insert('path', 'item_or_key', 'value')` to add an element to an array or object.
+  - Use `_.remove('path', 'item_or_key')` to remove an element from an array or object.
+  - When using _.set with objects or arrays, do NOT wrap them in quotes - use direct object/array literals (e.g., {key: value} or [item1, item2])
+  - When using _.set with strings, DO wrap them in quotes (e.g., 'string value')
+  - When using _.set with numbers or booleans, do NOT use quotes (e.g., 42, true, false)
+format: |-
+  <UpdateVariable>
+    <Analysis>
+      ${variable_path}: ${Whether the variable should be updated: 'Yes' or 'No'}
+      ...
+    </Analysis>
+    ${command_expression}; // ${brief reason for change}
+    ...
+  </UpdateVariable>
+example: |-
+  <UpdateVariable>
+    <Analysis>
+      世界.当前时间: Yes
+      世界.当前地点: Yes
+      橘日向.好感度: Yes
+      橘日向.当前着装: No
+      橘日向.当前姿势: Yes
+      橘日向.当前想法: Yes
+    </Analysis>
+    _.set('世界.当前时间', '2025年07月15日 星期二 下午 02:30', '2025年07月15日 星期二 下午 03:15'); // 对话后时间自然推进
+    _.set('世界.当前地点', '橘家-玄关', '橘家-客厅'); // {{user}}和日向移动到客厅
+    _.add('橘日向.好感度', 3); // {{user}}表现出对ACG的了解,让日向感到意外和惊喜
+    _.set('橘日向.当前姿势', '站在走廊尽头,双手不安地绞着T恤下摆,身体微微后倾', '坐在沙发上,抱着一个印有动漫角色的抱枕,眼睛偷偷瞄向{{user}}'); // 从警惕状态转为稍微放松
+    _.set('橘日向.当前想法', '这个人就是{{user}}吗...看起来好像还挺正常的?', '诶?他居然知道这部作品!难道...他也是同好?不会吧...说不定只是碰巧听说过而已...'); // 内心开始对{{user}}产生好奇
+  </UpdateVariable>

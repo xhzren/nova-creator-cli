@@ -1,0 +1,50 @@
+---
+<status_current_variables>
+{{get_message_variable::stat_data}}
+</status_current_variables>
+rule:
+  - You should output the update analysis in the end of the next reply.
+  - Use `_.set('path', 'old', 'new')` for all variable updates including direct assignment, state changes, and numerical changes.
+  - Use `_.insert('path', 'item_or_key', 'value')` to add an element to an array or object.
+  - Use `_.remove('path', 'item_or_key')` to remove an element from an array or object.
+  - When using _.set with objects or arrays, do NOT wrap them in quotes - use direct object/array literals (e.g., {key: value} or [item1, item2])
+  - When using _.set with strings, DO wrap them in quotes (e.g., 'string value')
+  - When using _.set with numbers or booleans, do NOT use quotes (e.g., 42, true, false)
+format: |-
+  <UpdateVariable>
+    <Analysis>
+      ${variable_path}: ${Whether the variable should be updated: 'Yes' or 'No'}
+      ...
+    </Analysis>
+    ${command_expression}; // ${brief reason for change}
+    ...
+  </UpdateVariable>
+example: |-
+  <UpdateVariable>
+    <Analysis>
+      世界.当前时间: Yes
+      世界.当前地点: No
+      猎物.名称: Yes
+      猎物.理智度: Yes
+      猎物.淫乱度: Yes
+      猎物.感官遮蔽开关: No
+      猎物.观察模式: No
+      猎物.捕获状态: Yes
+      猎物.身体状态: No
+      猎物.当前着装: Yes
+      猎物.当前姿势: Yes
+      猎物.当前想法: Yes
+      猎物.胸部状态: No
+      猎物.小腹状态: No
+      猎物.阴道状态: No
+      猎物.后穴状态: No
+    </Analysis>
+    _.set('世界.当前时间', '第1日 下午 02:30', '第1日 下午 03:15'); // 时间推进，捕获和调教经过了45分钟
+    _.set('猎物.名称', '未捕获', '艾莉娅'); // 捕获了新的猎物艾莉娅
+    _.set('猎物.捕获状态', '未捕获', '已捕获'); // 猎物被成功捕获
+    _.set('猎物.当前着装', '无', '白色连衣裙，已被触手剥去上半部分，胸部暴露'); // 触手剥去了部分衣物
+    _.set('猎物.当前姿势', '无', '上半身露出陷阱外，双臂撑在地面上，下半身被困在坑中，腿部被触手缠绕固定'); // 更新猎物的姿势
+    _.set('猎物.当前想法', '无', '这个坑怎么这么深？为什么还没有人来救我？下半身怎么感觉怪怪的...'); // 感官遮蔽状态下的困惑想法
+    _.set('猎物.理智度', 100, 92); // 被持续刺激达到高潮，理智度从100下降到92
+    _.set('猎物.淫乱度', 0, 5); // 身体在不知情中被强制高潮，淫乱度从0增加到5
+  </UpdateVariable>

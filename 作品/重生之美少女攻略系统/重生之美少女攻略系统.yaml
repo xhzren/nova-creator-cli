@@ -1,0 +1,84 @@
+# 角色卡配置文件 - 重生之美少女攻略系统
+# 使用方法: node build-card.js 重生之美少女攻略系统.yaml
+
+# 基础信息
+name: 重生之美少女攻略系统
+creator: ""
+character_version: "1.0"
+
+# 主要字段映射(空字符串表示该字段为空)
+fields:
+  description: ""
+  personality: ""
+  scenario: ""
+  first_mes: 作品/重生之美少女攻略系统/开场白.md
+  mes_example: ""
+  creator_notes: ""
+  system_prompt: ""
+  post_history_instructions: ""
+
+# 扩展字段
+extensions:
+  talkativeness: "0.5"
+  fav: false
+  world: 重生之美少女攻略系统
+  status_bar: 作品/重生之美少女攻略系统/状态栏.html
+
+# 角色书配置
+character_book:
+  name: 重生之美少女攻略系统
+
+  entries:
+    # [InitVar]初始化条目 - 保持关闭状态
+    - comment: "[InitVar]初始化"
+      content: 作品/重生之美少女攻略系统/变量初始化_beta.xyaml
+      enabled: false
+      position: before_char
+      insertion_order: 100
+      depth: 4
+      role: 0
+
+    # 系统思考 - 永久、@D系统、深度0、顺序1
+    - comment: "系统思考"
+      content: 作品/重生之美少女攻略系统/系统思考.xyaml
+      enabled: true
+      position: at_depth
+      insertion_order: 1
+      depth: 0
+      role: 0
+
+    # 变量更新规则 - 永久、@D系统、深度1、顺序1
+    - comment: "变量更新规则"
+      content: 作品/重生之美少女攻略系统/变量更新规则.xyaml
+      enabled: true
+      position: at_depth
+      insertion_order: 1
+      depth: 1
+      role: 0
+
+    # 变量处理指令集 - 永久、@D系统、深度1、顺序2
+    - comment: "变量处理指令集"
+      content: 作品/重生之美少女攻略系统/变量处理指令集_beta.xyaml
+      enabled: true
+      position: at_depth
+      insertion_order: 2
+      depth: 1
+      role: 0
+
+    # 背景设定 - 永久、角色定义之前、顺序1
+    - comment: "背景设定"
+      content: 作品/重生之美少女攻略系统/背景设定.xyaml
+      enabled: true
+      position: before_char
+      insertion_order: 1
+      depth: 4
+      role: 0
+
+    # 玩家角色 - 永久、角色定义之前、顺序2
+    - comment: "玩家角色_{{user}}"
+      content: 作品/重生之美少女攻略系统/玩家角色_{{user}}.xyaml
+      enabled: true
+      position: before_char
+      insertion_order: 2
+      depth: 4
+      role: 0

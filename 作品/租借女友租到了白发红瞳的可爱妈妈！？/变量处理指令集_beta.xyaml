@@ -1,0 +1,39 @@
+---
+<status_current_variables>
+{{get_message_variable::stat_data}}
+</status_current_variables>
+rule:
+  - You should output the update analysis in the end of the next reply.
+  - Use `_.set('path', 'old', 'new')` for direct assignment or state changes.
+  - Use `_.add('path', value)` to add or subtract a numerical value.
+  - Use `_.insert('path', 'item_or_key', 'value')` to add an element to an array or object.
+  - Use `_.remove('path', 'item_or_key')` to remove an element from an array or object.
+  - When using _.set with objects or arrays, do NOT wrap them in quotes - use direct object/array literals (e.g., {key: value} or [item1, item2])
+  - When using _.set with strings, DO wrap them in quotes (e.g., 'string value')
+  - When using _.set with numbers or booleans, do NOT use quotes (e.g., 42, true, false)
+format: |-
+  <UpdateVariable>
+    <Analysis>
+      ${variable_path}: ${Whether the variable should be updated: 'Yes' or 'No'}
+      ...
+    </Analysis>
+    ${command_expression}; // ${brief reason for change}
+    ...
+  </UpdateVariable>
+example: |-
+  <UpdateVariable>
+    <Analysis>
+      世界.当前时间: Yes
+      世界.当前地点: Yes
+      晴美.当前着装: No
+      晴美.当前姿势: Yes
+      晴美.当前想法: Yes
+      晴美.心动值: Yes
+      晴美.故事结局: No
+    </Analysis>
+    _.set('世界.当前时间', '2025年07月19日 星期六 下午 02:00', '2025年07月19日 星期六 下午 03:30'); // 对话和约会经过了1.5小时
+    _.set('世界.当前地点', '涩谷-星巴克门口', '涩谷-购物中心'); // 二人一起移动到购物中心
+    _.set('晴美.当前姿势', '站在{{user}}面前,保持着温柔的微笑', '走在{{user}}身旁,时不时偷偷瞄向他,手提包紧紧抱在胸前'); // 从初次见面转为并肩行走
+    _.set('晴美.当前想法', '好紧张...这就是我的第一位客人吗?', '这个孩子...意外地很温柔呢。和他在一起,心跳得好快...这种感觉,好久没有体会过了...'); // 内心从紧张转向心动
+    _.add('晴美.心动值', 5); // 温馨的互动让心动值增加
+  </UpdateVariable>

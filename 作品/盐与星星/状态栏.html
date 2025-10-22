@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>几何 状态</title>
+    <style>
+        :root {
+            --primary-purple: #9370db;
+            --secondary-purple: #8a63d2;
+            --accent-lavender: #b19cd9;
+            --soft-gray: #d3d3d3;
+            --background-light: #f5f3f7;
+            --text-dark: #4a4a4a;
+            --text-light: #8a8a8a;
+            --border-color: #e6dcf0;
+            --shadow-color: rgba(147, 112, 219, 0.2);
+            --danger-red: #dc143c;
+            --safe-green: #32cd32;
+            --neutral-yellow: #ffd700;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', Arial, sans-serif;
+            padding: 16px;
+            line-height: 1.6;
+            background: var(--background-light);
+        }
+
+        .status-card {
+            max-width: 700px;
+            margin: 0 auto;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px var(--shadow-color);
+            background: white;
+            border: 3px solid var(--border-color);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-purple) 0%, var(--secondary-purple) 100%);
+            padding: 24px;
+            text-align: center;
+            position: relative;
+        }
+
+        .card-header h2 {
+            color: white;
+            font-size: 26px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            letter-spacing: 2px;
+        }
+
+        .card-header .subtitle {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            margin-top: 8px;
+            font-style: italic;
+        }
+
+        .tabs-container {
+            display: flex;
+            background: var(--background-light);
+            border-bottom: 2px solid var(--border-color);
+            overflow-x: auto;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 14px 20px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 15px;
+            font-weight: bold;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            white-space: nowrap;
+        }
+
+        .tab-button:hover {
+            background: rgba(147, 112, 219, 0.1);
+        }
+
+        .tab-button.active {
+            color: var(--primary-purple);
+            border-bottom-color: var(--primary-purple);
+            background: white;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 24px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .world-info {
+            display: flex;
+            justify-content: space-around;
+            padding: 16px;
+            background: linear-gradient(135deg, #f9f7fb 0%, #ffffff 100%);
+            border-radius: 12px;
+            margin-bottom: 20px;
+            border: 2px solid var(--border-color);
+        }
+
+        .world-info-item {
+            text-align: center;
+        }
+
+        .world-info-label {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 6px;
+        }
+
+        .world-info-value {
+            font-size: 15px;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        .section {
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 2px solid var(--border-color);
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, var(--accent-lavender) 0%, var(--soft-gray) 100%);
+            padding: 14px 18px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-dark);
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .section-header:hover {
+            filter: brightness(1.05);
+        }
+
+        .section-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+        }
+
+        .section-content.expanded {
+            max-height: 3000px;
+        }
+
+        .property {
+            padding: 16px 18px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .property:last-child {
+            border-bottom: none;
+        }
+
+        .property-name {
+            font-weight: bold;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .property-name::before {
+            content: '◆';
+            color: var(--primary-purple);
+            margin-right: 8px;
+            font-size: 12px;
+        }
+
+        .property-value-container {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .value-main {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--primary-purple);
+            margin-right: 12px;
+        }
+
+        .value-description {
+            font-size: 13px;
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 22px;
+            background: linear-gradient(to right, #f0f0f0, #e8e8e8);
+            border-radius: 11px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .progress-bar-value {
+            height: 100%;
+            transition: width 0.6s ease;
+            border-radius: 11px;
+        }
+
+        .text-content {
+            color: var(--text-dark);
+            font-size: 14px;
+            line-height: 1.8;
+            padding: 4px 0;
+            word-break: break-word;
+        }
+
+        .list-item {
+            padding: 12px 16px;
+            margin-bottom: 10px;
+            background: #f9f7fb;
+            border-radius: 10px;
+            border-left: 4px solid var(--primary-purple);
+        }
+
+        .list-item-title {
+            font-weight: bold;
+            color: var(--primary-purple);
+            margin-bottom: 6px;
+        }
+
+        .list-item-content {
+            color: var(--text-dark);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        .diary-entry {
+            background: linear-gradient(135deg, #fefdfF 0%, #f9f7fb 100%);
+            padding: 20px;
+            margin-bottom: 16px;
+            border-radius: 12px;
+            border: 2px solid var(--border-color);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+        }
+
+        .diary-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .diary-date {
+            font-weight: bold;
+            color: var(--primary-purple);
+            font-size: 15px;
+        }
+
+        .diary-weather {
+            color: var(--text-light);
+            font-size: 14px;
+        }
+
+        .diary-content {
+            color: var(--text-dark);
+            line-height: 1.8;
+            white-space: pre-wrap;
+            font-size: 14px;
+        }
+
+        @media (max-width: 480px) {
+            .card-header h2 {
+                font-size: 22px;
+            }
+            .tab-button {
+                padding: 12px 14px;
+                font-size: 13px;
+            }
+            .value-main {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="status-card" id="status-card">
+    <div class="card-header">
+        <h2>✦ 几何的成长记录 ✦</h2>
+        <div class="subtitle">盐与星星</div>
+    </div>
+
+    <div class="tabs-container">
+        <button class="tab-button active" onclick="switchTab(0)">主页</button>
+        <button class="tab-button" onclick="switchTab(1)">成长记忆</button>
+        <button class="tab-button" onclick="switchTab(2)">朋友</button>
+        <button class="tab-button" onclick="switchTab(3)">礼物</button>
+        <button class="tab-button" onclick="switchTab(4)">日记</button>
+    </div>
+
+    <div class="tab-content active" id="tab-main">
+        <div class="world-info">
+            <div class="world-info-item">
+                <div class="world-info-label">当前时间</div>
+                <div class="world-info-value" id="world-time">--</div>
+            </div>
+            <div class="world-info-item">
+                <div class="world-info-label">当前地点</div>
+                <div class="world-info-value" id="world-location">--</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>基本信息</span>
+                <span>▼</span>
+            </div>
+            <div class="section-content">
+                <div class="property">
+                    <div class="property-name">年龄</div>
+                    <div class="property-value-container">
+                        <span class="value-main" id="geometry-age">12</span>
+                        <span class="value-description">岁</span>
+                    </div>
+                </div>
+                <div class="property">
+                    <div class="property-name">身高</div>
+                    <div class="property-value-container">
+                        <span class="value-main" id="geometry-height">145</span>
+                        <span class="value-description">cm</span>
+                    </div>
+                </div>
+                <div class="property">
+                    <div class="property-name">体重</div>
+                    <div class="property-value-container">
+                        <span class="value-main" id="geometry-weight">35</span>
+                        <span class="value-description">kg</span>
+                    </div>
+                </div>
+                <div class="property">
+                    <div class="property-name">体型</div>
+                    <div class="text-content" id="geometry-body-desc">--</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>关系状态</span>
+                <span>▼</span>
+            </div>
+            <div class="section-content">
+                <div class="property">
+                    <div class="property-name">好感度</div>
+                    <div class="property-value-container">
+                        <span class="value-main" id="affection-value">0</span>
+                        <span class="value-description" id="affection-desc"></span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div id="affection-bar" class="progress-bar-value"></div>
+                    </div>
+                </div>
+                <div class="property">
+                    <div class="property-name">信任度</div>
+                    <div class="property-value-container">
+                        <span class="value-main" id="trust-value">0</span>
+                        <span class="value-description" id="trust-desc"></span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div id="trust-bar" class="progress-bar-value"></div>
+                    </div>
+                </div>
+                <div class="property">
+                    <div class="property-name">亲密度</div>
+                    <div class="property-value-container">
+                        <span class="value-main" id="intimacy-value">0</span>
+                        <span class="value-description" id="intimacy-desc"></span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div id="intimacy-bar" class="progress-bar-value"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>外观与状态</span>
+                <span>▼</span>
+            </div>
+            <div class="section-content">
+                <div class="property">
+                    <div class="property-name">当前着装</div>
+                    <div class="text-content" id="geometry-outfit">--</div>
+                </div>
+                <div class="property">
+                    <div class="property-name">当前姿势</div>
+                    <div class="text-content" id="geometry-pose">--</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>内心想法</span>
+                <span>▼</span>
+            </div>
+            <div class="section-content">
+                <div class="property">
+                    <div class="property-name">当前所想</div>
+                    <div class="text-content" id="geometry-thoughts">--</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header" onclick="toggleSection(this)">
+                <span>兴趣爱好</span>
+                <span>▼</span>
+            </div>
+            <div class="section-content">
+                <div class="property" id="hobbies-container">
+                    <div class="empty-state">暂无记录</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-content" id="tab-memories">
+        <div id="memories-container">
+            <div class="empty-state">暂无重要记忆</div>
+        </div>
+    </div>
+
+    <div class="tab-content" id="tab-friends">
+        <div id="friends-container">
+            <div class="empty-state">还没有交到朋友</div>
+        </div>
+    </div>
+
+    <div class="tab-content" id="tab-gifts">
+        <div id="gifts-container">
+            <div class="empty-state">还没有收到礼物</div>
+        </div>
+    </div>
+
+    <div class="tab-content" id="tab-diary">
+        <div id="diary-container">
+            <div class="empty-state">几何还没有开始写日记</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function SafeGetValue(obj, path, defaultValue = "N/A") {
+        let keys = Array.isArray(path) ? path : path.split('.');
+        let current = obj;
+        for (let i = 0; i < keys.length; i++) {
+            if (current === undefined || current === null || typeof current !== 'object' || !current.hasOwnProperty(keys[i])) {
+                return defaultValue;
+            }
+            current = current[keys[i]];
+        }
+        if (current === undefined || current === null) {
+            return defaultValue;
+        }
+        if (Array.isArray(current)) {
+            return current;
+        }
+        if (typeof current === 'boolean') {
+            return current;
+        }
+        return String(current);
+    }
+
+    function updateProgressBar(barId, valueMainId, valueDescId, rawValue, min, max, gradient) {
+        const progressBar = document.getElementById(barId);
+        const valueMainDisplay = document.getElementById(valueMainId);
+        const valueDescDisplay = document.getElementById(valueDescId);
+
+        if (!valueMainDisplay) return;
+
+        let numericValue = typeof rawValue === 'number' ? rawValue : parseFloat(rawValue) || min;
+        valueMainDisplay.innerText = numericValue;
+
+        let descriptionText = "";
+        if (barId === 'affection-bar') {
+            if (numericValue < 34) descriptionText = "单纯的收养";
+            else if (numericValue < 67) descriptionText = "家人";
+            else descriptionText = "离不开的依赖";
+        } else if (barId === 'trust-bar') {
+            if (numericValue <= 3) descriptionText = "保留秘密";
+            else if (numericValue <= 7) descriptionText = "尝试分享";
+            else descriptionText = "无话不谈";
+        } else if (barId === 'intimacy-bar') {
+            if (numericValue < 34) descriptionText = "抗拒接触";
+            else if (numericValue < 67) descriptionText = "简单亲昵";
+            else descriptionText = "渴望粘人";
+        }
+
+        if (valueDescDisplay) {
+            valueDescDisplay.innerText = descriptionText ? `(${descriptionText})` : "";
+        }
+
+        if (progressBar) {
+            numericValue = Math.max(min, Math.min(max, numericValue));
+            const range = max - min;
+            const percentage = range === 0 ? (numericValue >= max ? 100 : 0) : ((numericValue - min) / range) * 100;
+            progressBar.style.width = `${Math.max(0, Math.min(100, percentage))}%`;
+            progressBar.style.background = gradient;
+        }
+    }
+
+    async function initDisplay() {
+        try {
+            const messages = await getChatMessages(getCurrentMessageId());
+            if (!messages || messages.length === 0 || !messages[0].data) {
+                document.getElementById('status-card').innerHTML = "<p style='color:red; padding:10px;'>无法加载状态数据</p>";
+                return;
+            }
+            const gameData = messages[0].data;
+            const characterData = gameData.stat_data;
+            if (!characterData) {
+                document.getElementById('status-card').innerHTML = "<p style='color:red; padding:10px;'>无法加载状态数据</p>";
+                return;
+            }
+
+            // 世界信息
+            if (characterData.世界) {
+                document.getElementById('world-time').innerText = SafeGetValue(characterData, '世界.当前时间', '--');
+                document.getElementById('world-location').innerText = SafeGetValue(characterData, '世界.当前地点', '--');
+            }
+
+            // 几何基本信息
+            if (characterData.几何) {
+                // 年龄需要base64解码
+                const ageEncoded = SafeGetValue(characterData, '几何.年龄', '');
+                let ageDecoded = '--';
+                try {
+                    if (ageEncoded) {
+                        ageDecoded = atob(ageEncoded);
+                    }
+                } catch (e) {
+                    // 如果解码失败,尝试直接使用
+                    ageDecoded = ageEncoded || '--';
+                }
+                document.getElementById('geometry-age').innerText = ageDecoded;
+
+                document.getElementById('geometry-height').innerText = SafeGetValue(characterData, '几何.身高', '145');
+                document.getElementById('geometry-weight').innerText = SafeGetValue(characterData, '几何.体重', '35');
+                document.getElementById('geometry-body-desc').innerText = SafeGetValue(characterData, '几何.体型描述', '--');
+                document.getElementById('geometry-outfit').innerText = SafeGetValue(characterData, '几何.当前着装', '--');
+                document.getElementById('geometry-pose').innerText = SafeGetValue(characterData, '几何.当前姿势', '--');
+                document.getElementById('geometry-thoughts').innerText = SafeGetValue(characterData, '几何.当前想法', '--');
+            }
+
+            // 关系状态
+            if (characterData.关系) {
+                updateProgressBar('affection-bar', 'affection-value', 'affection-desc',
+                    SafeGetValue(characterData, '关系.好感度', 0), 0, 100,
+                    'linear-gradient(90deg, #9370db 0%, #b19cd9 100%)');
+
+                updateProgressBar('trust-bar', 'trust-value', 'trust-desc',
+                    SafeGetValue(characterData, '关系.信任度', 0), -10, 10,
+                    'linear-gradient(90deg, #dc143c 0%, #ffd700 50%, #32cd32 100%)');
+
+                updateProgressBar('intimacy-bar', 'intimacy-value', 'intimacy-desc',
+                    SafeGetValue(characterData, '关系.亲密度', 0), 0, 100,
+                    'linear-gradient(90deg, #8a63d2 0%, #d3d3d3 100%)');
+            }
+
+            // 兴趣爱好
+            if (characterData.成长) {
+                const hobbies = SafeGetValue(characterData, '成长.兴趣爱好', []);
+                const hobbiesContainer = document.getElementById('hobbies-container');
+                if (Array.isArray(hobbies) && hobbies.length > 0) {
+                    hobbiesContainer.innerHTML = hobbies.map(h => `<div class="text-content">• ${h}</div>`).join('');
+                } else {
+                    hobbiesContainer.innerHTML = '<div class="empty-state">暂无记录</div>';
+                }
+
+                // 重要记忆
+                const memories = SafeGetValue(characterData, '成长.重要记忆', []);
+                const memoriesContainer = document.getElementById('memories-container');
+                if (Array.isArray(memories) && memories.length > 0) {
+                    memoriesContainer.innerHTML = memories.map(m => `
+                        <div class="list-item">
+                            <div class="list-item-title">${m.日期} - ${m.事件}</div>
+                            <div class="list-item-content">${m.描述}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    memoriesContainer.innerHTML = '<div class="empty-state">暂无重要记忆</div>';
+                }
+
+                // 朋友
+                const friends = SafeGetValue(characterData, '成长.朋友', []);
+                const friendsContainer = document.getElementById('friends-container');
+                if (Array.isArray(friends) && friends.length > 0) {
+                    friendsContainer.innerHTML = friends.map(f => `
+                        <div class="list-item">
+                            <div class="list-item-title">${f.名称}</div>
+                            <div class="list-item-content">${f.描述}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    friendsContainer.innerHTML = '<div class="empty-state">还没有交到朋友</div>';
+                }
+
+                // 礼物
+                const gifts = SafeGetValue(characterData, '成长.礼物', []);
+                const giftsContainer = document.getElementById('gifts-container');
+                if (Array.isArray(gifts) && gifts.length > 0) {
+                    giftsContainer.innerHTML = gifts.map(g => `
+                        <div class="list-item">
+                            <div class="list-item-title">${g.名称} <span style="color: var(--text-light); font-size: 12px;">(${g.赠送日期})</span></div>
+                            <div class="list-item-content">${g.描述}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    giftsContainer.innerHTML = '<div class="empty-state">还没有收到礼物</div>';
+                }
+            }
+
+            // 日记
+            if (characterData.日记) {
+                const diaryEntries = SafeGetValue(characterData, '日记.条目', []);
+                const diaryContainer = document.getElementById('diary-container');
+                if (Array.isArray(diaryEntries) && diaryEntries.length > 0) {
+                    diaryContainer.innerHTML = diaryEntries.slice().reverse().map(entry => `
+                        <div class="diary-entry">
+                            <div class="diary-header">
+                                <div class="diary-date">${entry.日期}</div>
+                                <div class="diary-weather">${entry.天气}</div>
+                            </div>
+                            <div class="diary-content">${entry.正文}</div>
+                        </div>
+                    `).join('');
+                } else {
+                    diaryContainer.innerHTML = '<div class="empty-state">几何还没有开始写日记</div>';
+                }
+            }
+
+        } catch (error) {
+            document.getElementById('status-card').innerHTML = `<p style='color:red; padding:10px;'>状态栏加载出错: ${error.message}</p>`;
+        }
+    }
+
+    function toggleSection(element) {
+        const content = element.nextElementSibling;
+        const arrow = element.querySelector('span:last-child');
+        if (!content || !arrow) return;
+        const isExpanded = content.classList.toggle('expanded');
+        arrow.innerText = isExpanded ? '▲' : '▼';
+    }
+
+    function switchTab(index) {
+        const buttons = document.querySelectorAll('.tab-button');
+        const contents = document.querySelectorAll('.tab-content');
+
+        buttons.forEach((btn, i) => {
+            btn.classList.toggle('active', i === index);
+        });
+
+        contents.forEach((content, i) => {
+            content.classList.toggle('active', i === index);
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', initDisplay);
+</script>
+</body>
+</html>

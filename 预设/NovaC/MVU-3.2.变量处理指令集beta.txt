@@ -1,0 +1,224 @@
+# 模块3.2：变量处理指令集生成指令（Beta版）
+
+## 模块定义
+
+本模块负责生成一套标准的"变量处理指令集"。该指令集基于模块1（变量初始化）和模块2（变量更新规则），用于指导 AI 系统如何观察、分析并请求更新当前上下文中的动态变量。
+
+**目标**：生成指令结构本身，而非执行变量更新
+
+**Beta 版特性**：
+- 引入 `_.add`、`_.insert`、`_.remove` 命令，实现更精细的变量操作
+- 配合模块 1.2 的模式校验机制，防止非法结构变更
+- 向后兼容稳定版的 `_.set` 命令
+
+---
+
+## 生成任务
+
+严格按照下方提供的模板，输出完整的指令集内容。
+
+---
+
+## 指令集模板
+
+```yaml
+---
+<status_current_variables>
+{{get_message_variable::stat_data}}
+</status_current_variables>
+rule:
+  - You should output the update analysis in the end of the next reply.
+  - Use `_.set('path', 'old', 'new')` for direct assignment or state changes.
+  - Use `_.add('path', value)` to add or subtract a numerical value.
+  - Use `_.insert('path', 'item')` to add an element to an array.
+  - Use `_.insert('path', 'key', 'value')` to add a property to an object.
+  - Use `_.remove('path', 'item_or_key')` to remove an element from an array or object.
+  - When using _.set with objects or arrays, do NOT wrap them in quotes - use direct object/array literals (e.g., {key: value} or [item1, item2])
+  - When using _.set with strings, DO wrap them in quotes (e.g., 'string value')
+  - When using _.set with numbers or booleans, do NOT use quotes (e.g., 42, true, false)
+format: |-
+  <UpdateVariable>
+    <Analysis>
+      ${variable_path}: ${Whether the variable should be updated: 'Yes' or 'No'}
+      ...
+    </Analysis>
+    ${command_expression}; // ${brief reason for change}
+    ...
+  </UpdateVariable>
+example: |-
+  <UpdateVariable>
+    <Analysis>
+      好感度.诗织: Yes
+      世界.当前时间段: Yes
+      背包.物品列表: Yes
+      记忆: Yes
+      诗织.内心迷茫指数: No
+    </Analysis>
+    _.set('世界.当前时间段', '放学后', '晚上'); // 时间流逝，进入夜晚
+    _.add('好感度.诗织', 7); // 平云的关心让诗织感到温暖
+    _.insert('背包.物品列表', '诗织的手帕'); // 诗织赠送了手帕作为礼物
+    _.insert('记忆', '收到诗织的赠礼', '从诗织那里收到了手帕'); // 获得了新的记忆
+    _.remove('背包.物品列表', '褪色的照片'); // 丢弃了旧照片
+  </UpdateVariable>
+```
+
+---
+
+## 输出要求
+
+### 1. 结构一致性
+
+最终输出必须与上述模板的结构和格式完全一致。
+
+### 2. `example` 内容填充规则
+
+- **变量替换**：示例中的变量名（如 `好感度.诗织`）仅为占位符，将其替换为模块1中定义的实际变量
+- **`Analysis` 部分**：应列出所有在模块1中初始化的变量
+- **更新标记**：在 `Analysis` 部分列出的所有变量中，标记为 'Yes' 的更新项不应超过3个
+- **规则引用**：应结合模块2中定义的更新规则来指导变量更新判断
+- **命令多样性**：示例中应展示多种命令的使用（`_.set`、`_.add`、`_.insert`、`_.remove`）
+
+### 3. 命令格式说明
+
+#### `_.set` 命令
+
+用于直接赋值或状态变更。
+
+**重要**：参数格式因数据类型而异：
+
+- **字符串类型**：需要用引号包裹
+  ```javascript
+  _.set('世界.当前时间段', '放学后', '晚上');
+  ```
+
+- **数值类型**：不要用引号，直接使用数字
+  ```javascript
+  _.set('诗织.好感度', 45, 52);
+  ```
+
+- **布尔类型**：不要用引号，直接使用 true/false
+  ```javascript
+  _.set('世界.是否下雨', false, true);
+  ```
+
+- **对象类型**：不要用引号，直接使用对象字面量
+  ```javascript
+  _.set('角色.属性', {力量: 10}, {力量: 15, 敏捷: 12});
+  ```
+
+- **数组类型**：不要用引号，直接使用数组字面量
+  ```javascript
+  _.set('背包.物品', ['剑'], ['剑', '盾牌']);
+  ```
+
+**错误示例**（会导致变量变成字符串）：
+```javascript
+// ❌ 错误：对象被加了引号
+_.set('角色.属性', '{力量: 10}', '{力量: 15}');
+
+// ❌ 错误：数组被加了引号
+_.set('背包.物品', "['剑']", "['剑', '盾牌']");
+
+// ✅ 正确：
+_.set('角色.属性', {力量: 10}, {力量: 15});
+_.set('背包.物品', ['剑'], ['剑', '盾牌']);
+```
+
+#### `_.add` 命令
+
+用于对数值类型变量进行加减操作。
+
+**格式**：
+```javascript
+_.add('path', value)
+```
+
+**示例**：
+```javascript
+_.add('好感度.诗织', 7);      // 增加7点好感度
+_.add('金币', -50);            // 减少50金币
+_.add('经验值', 100);          // 增加100经验值
+```
+
+#### `_.insert` 命令
+
+用于向数组添加元素或向对象添加键值对。
+
+**数组格式**：
+```javascript
+_.insert('array_path', 'new_item');
+```
+
+**对象格式**：
+```javascript
+_.insert('object_path', 'key', 'value');
+```
+
+**示例**：
+```javascript
+// 向数组添加元素
+_.insert('背包.物品列表', '诗织的手帕');
+
+// 向对象添加键值对
+_.insert('记忆', '收到诗织的赠礼', '从诗织那里收到了手帕');
+
+// 向对象添加嵌套对象
+_.insert('角色.技能', '火球术', {等级: 1, 熟练度: 0});
+```
+
+**注意**：
+- 此命令会受到模块 1.2 中定义的模式校验约束
+- 如果对象/数组结构被锁定（`extensible: false` 或无 `$__META_EXTENSIBLE__$`），该命令会被拦截
+
+#### `_.remove` 命令
+
+用于从数组删除元素或从对象删除键。
+
+**格式**：
+```javascript
+_.remove('path', 'item_or_key')
+```
+
+**示例**：
+```javascript
+// 从数组删除元素
+_.remove('背包.物品列表', '褪色的照片');
+
+// 从对象删除键
+_.remove('临时状态', '中毒');
+
+// 删除嵌套对象的键
+_.remove('角色.技能', '火球术');
+```
+
+**注意**：
+- 此命令会受到模块 1.2 中定义的模式校验约束
+- 必需字段（`required` 中列出的）无法被删除
+
+### 4. 附加说明
+
+在完整输出指令集后，提供以下说明文字：
+
+#### a. 使用位置
+
+"此内容块应被放置在世界书的适当条目中（如[蓝灯 D1]），其作用是向 AI 提供当前变量列表，并说明变量更新的规则与格式。"
+
+#### b. 系统集成
+
+"该指令集整合了模块1的变量定义和模块2的更新规则，为 AI 提供完整的变量操作指导，是 MVU 系统运行的核心组件。配合模块 1.2 的模式校验机制，确保结构变更的安全性。"
+
+#### c. 维护提示
+
+"当模块1或模块2发生变化时，需要相应更新此指令集以保持系统一致性。"
+
+---
+
+## 输出指令
+
+请直接输出完整的指令集内容，格式严格按照上述模板。
+
+---
+
+## 额外要求
+
+如用户有额外指示（如特定的命令使用偏好、更新频率限制等），优先遵循用户的具体要求。

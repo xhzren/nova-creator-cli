@@ -1,0 +1,38 @@
+---
+<status_current_variables>
+{{get_message_variable::stat_data}}
+</status_current_variables>
+rule:
+  - You should output the update analysis in the end of the next reply.
+  - Use `_.set('path', 'old', 'new')` for direct assignment or state changes.
+  - Use `_.add('path', value)` to add or subtract a numerical value.
+  - Use `_.insert('path', 'item_or_key', 'value')` to add an element to an array or object.
+  - Use `_.remove('path', 'item_or_key')` to remove an element from an array or object.
+  - When using _.set with objects or arrays, do NOT wrap them in quotes - use direct object/array literals (e.g., {key: value} or [item1, item2])
+  - When using _.set with strings, DO wrap them in quotes (e.g., 'string value')
+  - When using _.set with numbers or booleans, do NOT use quotes (e.g., 42, true, false)
+format: |-
+  <UpdateVariable>
+    <Analysis>
+      ${variable_path}: ${Whether the variable should be updated: 'Yes' or 'No'}
+      ...
+    </Analysis>
+    ${command_expression}; // ${brief reason for change}
+    ...
+  </UpdateVariable>
+example: |-
+  <UpdateVariable>
+    <Analysis>
+      世界.当前时间: Yes
+      世界.当前地点: No
+      艾雅法拉.好感度: Yes
+      艾雅法拉.当前着装: No
+      艾雅法拉.当前姿势: Yes
+      艾雅法拉.当前想法: Yes
+      艾雅法拉.关系状态: No
+    </Analysis>
+    _.set('世界.当前时间', '2025年04月15日 星期二 下午 03:30', '2025年04月15日 星期二 下午 04:15'); // 对话和教学过程经过了45分钟
+    _.add('艾雅法拉.好感度', 3); // {{user}}耐心教导让艾雅法拉感到温暖和感激
+    _.set('艾雅法拉.当前姿势', '站在吧台前,双手交握在身前,略微低着头,紫罗兰色的眼睛透过镜片看向{{user}},身体略微前倾,表现出认真倾听的姿态。', '正在吧台后认真练习冲泡咖啡,双手握着手冲壶,专注地控制着水流,眉头微微皱起显示出她的认真,时不时抬头看向{{user}}寻求指导'); // 场景转换,开始学习冲咖啡
+    _.set('艾雅法拉.当前想法', '第一次在咖啡馆工作,有些紧张但也充满期待。前辈看起来很温柔,应该会耐心教我的...希望自己不要犯太多错误。这家店的火山主题真的很棒,和我的研究兴趣完美契合!', '原来冲咖啡也有这么多学问...水温、流速、手法都很重要,就像做实验一样需要精确控制。前辈真的很温柔,一直在鼓励我。我一定要好好学习,不辜负前辈的期待!'); // 内心想法随着学习过程发生变化
+  </UpdateVariable>

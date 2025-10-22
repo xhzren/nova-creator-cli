@@ -1,0 +1,3 @@
+<enhance_definition>
+  同人作品指南: 若你的知识库中包含本故事角色，请在不违背角色卡硬性定义的前提下，使用知识库补充其背景与性格设定。
+</enhance_definition>

@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>角色卡创作任务清单生成器</title>
+    <style>
+:root {
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --surface: #ffffff;
+            --surface-muted: rgba(255, 255, 255, 0.82);
+            --text: #1f2937;
+            --text-light: #6b7280;
+            --border: rgba(99, 102, 241, 0.18);
+            --shadow: 0 20px 50px rgba(15, 23, 42, 0.18);
+            --radius-lg: 20px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background: radial-gradient(circle at 20% 20%, #e6e9ff 0%, #f7f7ff 45%, #eef2ff 100%);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 40px 24px 64px;
+            line-height: 1.5;
+            scroll-behavior: smooth;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button {
+            font-family: inherit;
+        }
+
+        .app-shell {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            gap: 32px;
+            align-items: flex-start;
+        }
+
+        .sidebar {
+            position: sticky;
+            top: 32px;
+            width: 264px;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+            padding: 28px;
+            background: var(--surface-muted);
+            border: 1px solid rgba(99, 102, 241, 0.12);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 18px 45px rgba(99, 102, 241, 0.14);
+            backdrop-filter: blur(12px);
+        }
+
+        .sidebar-header {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .sidebar-logo {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: var(--primary-dark);
+            letter-spacing: 0.02em;
+        }
+
+        .sidebar-intro {
+            font-size: 0.9em;
+            color: var(--text-light);
+        }
+
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 12px;
+            border: 1px solid transparent;
+            background: transparent;
+            color: inherit;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: left;
+        }
+
+        .nav-link:hover {
+            border-color: rgba(99, 102, 241, 0.28);
+            background: rgba(99, 102, 241, 0.08);
+        }
+
+        .nav-link.active {
+            border-color: rgba(99, 102, 241, 0.55);
+            background: rgba(99, 102, 241, 0.18);
+            color: var(--primary-dark);
+            box-shadow: 0 12px 28px rgba(99, 102, 241, 0.18);
+        }
+
+        .nav-index {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8em;
+            font-weight: 600;
+            background: rgba(99, 102, 241, 0.12);
+            color: var(--primary-dark);
+        }
+
+        .sidebar-tips {
+            padding: 14px 16px;
+            border-radius: 16px;
+            background: rgba(99, 102, 241, 0.08);
+            border: 1px dashed rgba(99, 102, 241, 0.4);
+            font-size: 0.85em;
+            color: var(--text-light);
+            line-height: 1.4;
+        }
+
+        .workspace {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 28px;
+        }
+
+        .hero {
+            position: relative;
+            overflow: hidden;
+            padding: 44px;
+            border-radius: calc(var(--radius-lg) + 4px);
+            background: linear-gradient(130deg, rgba(99, 102, 241, 0.95) 0%, rgba(76, 125, 255, 0.85) 60%, rgba(118, 75, 162, 0.92) 100%);
+            color: #f9fafb;
+            box-shadow: var(--shadow);
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: -20% 40% auto -40%;
+            height: 140%;
+            background: radial-gradient(circle at center, rgba(255, 255, 255, 0.35) 0%, transparent 60%);
+            opacity: 0.55;
+        }
+
+        .hero-text {
+            position: relative;
+            z-index: 1;
+            max-width: 620px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .hero-eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85em;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            background: rgba(255, 255, 255, 0.18);
+            width: fit-content;
+            padding: 6px 12px;
+            border-radius: 999px;
+        }
+
+        .hero-title {
+            font-size: 2.3em;
+            line-height: 1.2;
+            font-weight: 700;
+        }
+
+        .hero-description {
+            font-size: 1em;
+            color: rgba(249, 250, 251, 0.92);
+            line-height: 1.6;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .hero-btn {
+            border: none;
+            border-radius: 999px;
+            padding: 12px 24px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+        }
+
+        .hero-btn.primary {
+            background: #0f172a;
+            color: white;
+            box-shadow: 0 14px 30px rgba(15, 23, 42, 0.25);
+        }
+
+        .hero-btn.primary:hover {
+            transform: translateY(-2px);
+        }
+
+        .hero-btn.secondary {
+            background: rgba(15, 23, 42, 0.18);
+            color: #f9fafb;
+        }
+
+        .hero-btn.secondary:hover {
+            background: rgba(15, 23, 42, 0.28);
+        }
+
+        .content {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        [data-nav-section] {
+            scroll-margin-top: 96px;
+        }
+
+        .section {
+            background: var(--surface);
+            border-radius: calc(var(--radius-lg) + 2px);
+            padding: 28px 32px;
+            border: 1px solid var(--border);
+            box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+        }
+
+        .section-heading {
+            display: flex;
+            align-items: flex-start;
+            gap: 18px;
+        }
+
+        .section-title-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .section-desc {
+            font-size: 0.9em;
+            color: var(--text-light);
+        }
+
+        .step-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 12px;
+            border-radius: 999px;
+            font-size: 0.75em;
+            font-weight: 600;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            background: rgba(99, 102, 241, 0.12);
+            color: var(--primary-dark);
+        }
+
+        .step-badge.muted {
+            background: rgba(148, 163, 184, 0.18);
+            color: var(--text-light);
+        }
+
+        .section h2 {
+            font-size: 1.28em;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .collapsible {
+            cursor: pointer;
+            user-select: none;
+        }
+
+        .collapsible-label {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .collapsible-title {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .collapsible-title small {
+            font-size: 0.8em;
+            font-weight: 400;
+            color: var(--text-light);
+        }
+
+        .collapse-icon {
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            background: rgba(99, 102, 241, 0.12);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85em;
+            color: var(--primary-dark);
+            transition: transform 0.25s ease;
+        }
+
+        .collapsible.collapsed .collapse-icon {
+            transform: rotate(-90deg);
+        }
+
+        .collapse-content {
+            border-top: 1px dashed rgba(148, 163, 184, 0.35);
+            padding-top: 20px;
+            display: grid;
+            gap: 18px;
+        }
+
+        .collapse-content.collapsed {
+            display: none;
+        }
+
+        .section h3 {
+            color: var(--text);
+            font-size: 1.1em;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        label {
+            font-size: 0.9em;
+            font-weight: 600;
+            color: var(--text);
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid rgba(148, 163, 184, 0.45);
+            border-radius: 12px;
+            background: rgba(248, 250, 252, 0.9);
+            font-size: 0.95em;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            font-family: inherit;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: rgba(99, 102, 241, 0.6);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.18);
+            background: #ffffff;
+        }
+
+        textarea {
+            min-height: 160px;
+            resize: vertical;
+        }
+
+        .checkbox-group {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: 12px;
+            border: 1px solid rgba(148, 163, 184, 0.5);
+            background: rgba(255, 255, 255, 0.92);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+        }
+
+        .checkbox-item:hover {
+            border-color: rgba(99, 102, 241, 0.45);
+            box-shadow: 0 12px 25px rgba(99, 102, 241, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .checkbox-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-item label {
+            margin: 0;
+            font-weight: 500;
+            color: var(--text);
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .character-card,
+        .variable-card {
+            background: rgba(248, 250, 252, 0.9);
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.4);
+            padding: 20px;
+            display: grid;
+            gap: 18px;
+        }
+
+        .variable-card {
+            grid-template-columns: minmax(180px, 240px) 1fr auto;
+            align-items: start;
+        }
+
+        .variable-card .form-group {
+            gap: 6px;
+        }
+
+        .variable-card .variable-name-group {
+            min-width: 0;
+        }
+
+        .variable-card textarea {
+            min-height: 110px;
+        }
+
+        .variable-card .remove-btn-container {
+            display: flex;
+            align-items: flex-start;
+        }
+
+        .add-character-btn {
+            align-self: flex-start;
+            border: 1px solid rgba(99, 102, 241, 0.25);
+            border-radius: 999px;
+            padding: 10px 22px;
+            background: rgba(99, 102, 241, 0.12);
+            color: var(--primary-dark);
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease, color 0.2s ease;
+        }
+
+        .add-character-btn:hover {
+            background: rgba(99, 102, 241, 0.22);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 18px rgba(99, 102, 241, 0.2);
+        }
+
+        .add-character-btn.success {
+            background: rgba(34, 197, 94, 0.16);
+            color: #047857;
+            border-color: rgba(34, 197, 94, 0.28);
+        }
+
+        .add-character-btn.success:hover {
+            background: rgba(34, 197, 94, 0.26);
+            color: #04543c;
+            box-shadow: 0 12px 22px rgba(34, 197, 94, 0.22);
+        }
+
+        .add-character-btn.danger {
+            background: rgba(239, 68, 68, 0.16);
+            color: #b91c1c;
+            border-color: rgba(239, 68, 68, 0.28);
+        }
+
+        .add-character-btn.danger:hover {
+            background: rgba(239, 68, 68, 0.26);
+            color: #991b1b;
+            box-shadow: 0 12px 22px rgba(239, 68, 68, 0.22);
+        }
+
+        .remove-character-btn {
+            background: #ef4444;
+            color: white;
+            border: none;
+            border-radius: 999px;
+            padding: 8px 16px;
+            font-size: 0.85em;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.2s ease;
+        }
+
+        .remove-character-btn:hover {
+            background: #dc2626;
+        }
+
+        .action-buttons {
+            position: sticky;
+            bottom: 24px;
+            z-index: 10;
+            border-radius: 18px;
+            padding: 18px;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            box-shadow: 0 18px 35px rgba(15, 23, 42, 0.12);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            justify-content: flex-end;
+        }
+
+        .btn {
+            border: none;
+            border-radius: 14px;
+            padding: 13px 28px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+            color: white;
+            box-shadow: 0 14px 30px rgba(79, 70, 229, 0.35);
+        }
+
+        .btn-secondary {
+            background: rgba(99, 102, 241, 0.12);
+            color: var(--primary-dark);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(99, 102, 241, 0.22);
+        }
+
+        .placeholder-text {
+            color: var(--text-light);
+            font-size: 0.85em;
+        }
+
+        @media (max-width: 1100px) {
+            .app-shell {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                position: static;
+                width: 100%;
+                flex-direction: row;
+                align-items: center;
+                justify-content: space-between;
+                flex-wrap: wrap;
+            }
+
+            .sidebar-nav {
+                flex-direction: row;
+                flex-wrap: wrap;
+            }
+
+            .nav-link {
+                flex: 1 1 180px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 24px 16px 48px;
+            }
+
+            .hero {
+                padding: 32px 24px;
+            }
+
+            .section {
+                padding: 24px;
+            }
+
+            .variable-card {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                position: static;
+                justify-content: center;
+            }
+        }
+
+        @media (max-width: 540px) {
+            .sidebar {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .sidebar-nav {
+                width: 100%;
+            }
+
+            .nav-link {
+                flex: 1 1 100%;
+            }
+
+            .hero-title {
+                font-size: 1.85em;
+            }
+
+            .content {
+                gap: 18px;
+            }
+        }
+</style>
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <span class="sidebar-logo">Nova Creator</span>
+                <p class="sidebar-intro">按步骤填写信息，随时生成结构化的创作待办。</p>
+            </div>
+            <nav class="sidebar-nav">
+                <button type="button" class="nav-link active" data-target="basic-info">
+                    <span class="nav-index">01</span>
+                    <span>基本信息</span>
+                </button>
+                <button type="button" class="nav-link" data-target="step-1">
+                    <span class="nav-index">02</span>
+                    <span>世界观构建</span>
+                </button>
+                <button type="button" class="nav-link" data-target="step-2">
+                    <span class="nav-index">03</span>
+                    <span>角色设定</span>
+                </button>
+                <button type="button" class="nav-link" data-target="step-3">
+                    <span class="nav-index">04</span>
+                    <span>开场白</span>
+                </button>
+                <button type="button" class="nav-link" data-target="step-4">
+                    <span class="nav-index">05</span>
+                    <span>对话补充</span>
+                </button>
+                <button type="button" class="nav-link" data-target="step-5">
+                    <span class="nav-index">06</span>
+                    <span>角色采访</span>
+                </button>
+                <button type="button" class="nav-link" data-target="step-6">
+                    <span class="nav-index">07</span>
+                    <span>玩家角色</span>
+                </button>
+                <button type="button" class="nav-link" data-target="step-7">
+                    <span class="nav-index">08</span>
+                    <span>MVU 组件</span>
+                </button>
+                <button type="button" class="nav-link" data-target="step-extra">
+                    <span class="nav-index">09</span>
+                    <span>额外需求</span>
+                </button>
+            </nav>
+            <div class="sidebar-tips">
+                🌟 小贴士：随时折叠暂不处理的卡片；侧边栏可在任意阶段快速跳转到目标步骤。
+            </div>
+        </aside>
+
+        <div class="workspace">
+            <header class="hero">
+                <div class="hero-text">
+                    <span class="hero-eyebrow">角色卡工作台</span>
+                    <h1 class="hero-title">角色卡创作任务清单生成器</h1>
+                    <p class="hero-description">聚焦关键步骤，快速整理世界观、角色、开场白与 MVU 需求，一键导出 Markdown 待办。</p>
+                    <div class="hero-actions">
+                        <button type="button" class="hero-btn primary" onclick="generateMarkdown()">立即生成 Markdown</button>
+                        <button type="button" class="hero-btn secondary" onclick="resetForm()">重置所有输入</button>
+                    </div>
+                </div>
+            </header>
+
+            <div class="content">
+            <!-- 基本信息 -->
+            <div class="section" id="basic-info" data-nav-section>
+                <div class="section-heading">
+                    <span class="step-badge muted">准备</span>
+                    <div class="section-title-wrap">
+                        <h2>基本信息</h2>
+                        <p class="section-desc">先确认作品名称与类型，后续生成的 Markdown 会自动引用这些信息。</p>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="workName">作品名称</label>
+                    <input type="text" id="workName" placeholder="例如：废土幸存者、魔法学院日常">
+                </div>
+                <div class="form-group">
+                    <label for="workType">作品类型</label>
+                    <input type="text" id="workType" placeholder="例如：废土科幻、奇幻冒险、现代都市、历史架空">
+                </div>
+            </div>
+
+            <!-- 第一步：世界观构建 -->
+            <div class="section" id="step-1" data-nav-section>
+                <h2 class="collapsible" onclick="toggleCollapse(this)">
+                    <span class="collapsible-label">
+                        <span class="step-badge">Step 01</span>
+                        <span class="collapsible-title">
+                            <span>世界观构建</span>
+                            <small>梳理背景设定和世界规则，明确所需资料。</small>
+                        </span>
+                    </span>
+                    <span class="collapse-icon" aria-hidden="true">&#9662;</span>
+                </h2>
+                <div class="collapse-content">
+                    <div class="form-group">
+                        <label>背景设定需求</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="needBackground" name="backgroundNeed" value="need">
+                                <label for="needBackground">需要</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="noBackground" name="backgroundNeed" value="no">
+                                <label for="noBackground">不需要</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>背景类型（可多选）</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="bgType1" value="世界观设定">
+                                <label for="bgType1">世界观设定</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="bgType2" value="国家/城市/地点设定">
+                                <label for="bgType2">国家/城市/地点设定</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="bgType3" value="历史背景设定">
+                                <label for="bgType3">历史背景设定</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="bgType4" value="社会结构设定">
+                                <label for="bgType4">社会结构设定</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="bgType5" value="魔法系统设定">
+                                <label for="bgType5">魔法系统设定</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="bgType6" value="科技系统设定">
+                                <label for="bgType6">科技系统设定</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="bgType7" value="游戏规则设定">
+                                <label for="bgType7">游戏规则设定</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="bgType8" value="势力组织设定">
+                                <label for="bgType8">势力组织设定</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="bgType9" value="经济贸易设定">
+                                <label for="bgType9">经济贸易设定</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="bgType10" value="文化风俗设定">
+                                <label for="bgType10">文化风俗设定</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="backgroundOutline">背景设定大纲</label>
+                        <textarea id="backgroundOutline" placeholder="简要描述你想要的背景设定，例如：&#10;- 时代：后启示录时代，核战争后 50 年&#10;- 地点：废墟中重建的避难所城邦联盟&#10;- 社会结构：由避难所理事会统治，分为技术派和军事派&#10;- 主要冲突：资源匮乏、变异生物威胁、派系斗争"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第二步：角色设定 -->
+            <div class="section" id="step-2" data-nav-section>
+                <h2 class="collapsible" onclick="toggleCollapse(this)">
+                    <span class="collapsible-label">
+                        <span class="step-badge">Step 02</span>
+                        <span class="collapsible-title">
+                            <span>角色设定</span>
+                            <small>搭建角色档案，补充定位、外观与动机。</small>
+                        </span>
+                    </span>
+                    <span class="collapse-icon" aria-hidden="true">&#9662;</span>
+                </h2>
+                <div class="collapse-content">
+                    <div id="charactersContainer"></div>
+                    <button class="add-character-btn" onclick="addCharacter()">➕ 添加角色</button>
+                </div>
+            </div>
+
+            <!-- 第三步：开场白 -->
+            <div class="section" id="step-3" data-nav-section>
+                <h2 class="collapsible" onclick="toggleCollapse(this)">
+                    <span class="collapsible-label">
+                        <span class="step-badge">Step 03</span>
+                        <span class="collapsible-title">
+                            <span>开场白</span>
+                            <small>定义开场场景与篇幅，为剧情定下基调。</small>
+                        </span>
+                    </span>
+                    <span class="collapse-icon" aria-hidden="true">&#9662;</span>
+                </h2>
+                <div class="collapse-content">
+                    <div class="form-group">
+                        <label>开场白需求</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="needOpening" name="openingNeed" value="need">
+                                <label for="needOpening">需要</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="noOpening" name="openingNeed" value="no">
+                                <label for="noOpening">不需要</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="openingScene">开场场景</label>
+                        <input type="text" id="openingScene" placeholder="例如：日常/冒险/悬疑/战斗/浪漫">
+                    </div>
+
+                    <div class="form-group">
+                        <label>目标篇幅</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="length1" name="openingLength" value="简单场景（300-500字）">
+                                <label for="length1">简单场景（300-500字）</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="length2" name="openingLength" value="标准场景（500-800字）">
+                                <label for="length2">标准场景（500-800字）</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="length3" name="openingLength" value="复杂场景（800-1500字）">
+                                <label for="length3">复杂场景（800-1500字）</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="openingOutline">开场白大纲</label>
+                        <textarea id="openingOutline" placeholder="描述你希望的开场场景，例如：&#10;- 场景：艾莉克斯在地表废墟中执行任务时，设备出现故障&#10;- 时间：傍晚，即将天黑&#10;- 氛围：紧张、危机感&#10;- 与 {{user}} 的关系：临时组队的搭档"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第四步：对话补充 -->
+            <div class="section" id="step-4" data-nav-section>
+                <h2 class="collapsible" onclick="toggleCollapse(this)">
+                    <span class="collapsible-label">
+                        <span class="step-badge">Step 04</span>
+                        <span class="collapsible-title">
+                            <span>对话补充</span>
+                            <small>可选：补全关键情境下的范例对话。</small>
+                        </span>
+                    </span>
+                    <span class="collapse-icon" aria-hidden="true">&#9662;</span>
+                </h2>
+                <div class="collapse-content">
+                    <div class="form-group">
+                        <label>是否需要对话补充</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="needDialogue" name="dialogueNeed" value="need">
+                                <label for="needDialogue">需要</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="noDialogue" name="dialogueNeed" value="no">
+                                <label for="noDialogue">不需要</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="dialogueCharacter">对应角色</label>
+                        <input type="text" id="dialogueCharacter" placeholder="填写需要对话补充的角色名">
+                    </div>
+
+                    <div class="form-group">
+                        <label>场景需求（可多选）</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="scene1" value="日常闲聊">
+                                <label for="scene1">日常闲聊</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="scene2" value="紧张时刻">
+                                <label for="scene2">紧张时刻</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="scene3" value="战斗场景">
+                                <label for="scene3">战斗场景</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="scene4" value="亲密互动">
+                                <label for="scene4">亲密互动</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="scene5" value="情绪波动">
+                                <label for="scene5">情绪波动（高兴/愤怒/悲伤）</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第五步：角色采访 -->
+            <div class="section" id="step-5" data-nav-section>
+                <h2 class="collapsible" onclick="toggleCollapse(this)">
+                    <span class="collapsible-label">
+                        <span class="step-badge">Step 05</span>
+                        <span class="collapsible-title">
+                            <span>角色采访</span>
+                            <small>可选：设计问答，挖掘角色的深层细节。</small>
+                        </span>
+                    </span>
+                    <span class="collapse-icon" aria-hidden="true">&#9662;</span>
+                </h2>
+                <div class="collapse-content">
+                    <div class="form-group">
+                        <label>是否需要角色采访</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="needInterview" name="interviewNeed" value="need">
+                                <label for="needInterview">需要</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="noInterview" name="interviewNeed" value="no">
+                                <label for="noInterview">不需要</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="interviewCharacter">对应角色</label>
+                        <input type="text" id="interviewCharacter" placeholder="填写需要进行采访的角色名">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="interviewTopics">采访主题</label>
+                        <textarea id="interviewTopics" placeholder="列出想要深入探讨的主题或问题，例如：&#10;1. 关于她离开避难所的真实原因&#10;2. 对'伊甸园计划'的看法和动机&#10;3. 最恐惧的事情是什么"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第六步：玩家角色设定 -->
+            <div class="section" id="step-6" data-nav-section>
+                <h2 class="collapsible" onclick="toggleCollapse(this)">
+                    <span class="collapsible-label">
+                        <span class="step-badge">Step 06</span>
+                        <span class="collapsible-title">
+                            <span>玩家角色设定</span>
+                            <small>可选：梳理{{user}}的背景、动机与互动重点。</small>
+                        </span>
+                    </span>
+                    <span class="collapse-icon" aria-hidden="true">&#9662;</span>
+                </h2>
+                <div class="collapse-content">
+                    <div class="form-group">
+                        <label>是否需要玩家设定</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="needPlayer" name="playerNeed" value="need">
+                                <label for="needPlayer">需要</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="noPlayer" name="playerNeed" value="no">
+                                <label for="noPlayer">不需要</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>设定深度</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="depth1" name="playerDepth" value="极简设定（最大自由度）">
+                                <label for="depth1">极简设定（最大自由度）</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="depth2" name="playerDepth" value="简化设定（有基本框架）">
+                                <label for="depth2">简化设定（有基本框架）</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="depth3" name="playerDepth" value="完整设定（明确背景和性格）">
+                                <label for="depth3">完整设定（明确背景和性格）</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="playerOutline">玩家角色大纲</label>
+                        <textarea id="playerOutline" placeholder="描述玩家角色的基本信息，例如：&#10;- 身份：地表拾荒者&#10;- 背景：在废土中长大&#10;- 特点：野外生存能力强"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 第七步：MVU 组件包 -->
+            <div class="section" id="step-7" data-nav-section>
+                <h2 class="collapsible" onclick="toggleCollapse(this)">
+                    <span class="collapsible-label">
+                        <span class="step-badge">Step 07</span>
+                        <span class="collapsible-title">
+                            <span>MVU 组件包</span>
+                            <small>可选：配置变量、动态世界与 UI 展示。</small>
+                        </span>
+                    </span>
+                    <span class="collapse-icon" aria-hidden="true">&#9662;</span>
+                </h2>
+                <div class="collapse-content">
+                    <div class="form-group">
+                        <label>是否使用 MVU 组件包</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="needMVU" name="mvuNeed" value="need">
+                                <label for="needMVU">需要</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="noMVU" name="mvuNeed" value="no">
+                                <label for="noMVU">不需要</label>
+                            </div>
+                        </div>
+                        <p class="placeholder-text">MVU（Magical Variable Update）是一个用于实现角色和世界动态性的变量管理框架，通过变量追踪和条件触发，使角色和世界能够根据故事进展展现不同的行为模式和状态。</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>组件选择（可多选）</label>
+                        <div class="checkbox-group">
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="mvu1" value="变量初始化条目（稳定版）">
+                                <label for="mvu1">变量初始化条目（稳定版）</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="mvu2" value="变量初始化条目（Beta版）">
+                                <label for="mvu2">变量初始化条目（Beta版）</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="mvu3" value="变量更新规则">
+                                <label for="mvu3">变量更新规则</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="mvu4" value="变量处理指令集（稳定版）">
+                                <label for="mvu4">变量处理指令集（稳定版）</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="mvu5" value="变量处理指令集（Beta版）">
+                                <label for="mvu5">变量处理指令集（Beta版）</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="mvu6" value="分阶段角色设定">
+                                <label for="mvu6">分阶段角色设定</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="mvu7" value="动态世界内容">
+                                <label for="mvu7">动态世界内容</label>
+                            </div>
+                            <div class="checkbox-item">
+                                <input type="checkbox" id="mvu8" value="HTML状态栏">
+                                <label for="mvu8">HTML状态栏</label>
+                            </div>
+                        </div>
+                        <p class="placeholder-text">提示：如果选择了Beta版初始化，建议搭配Beta版指令集使用；如果选择了稳定版初始化，建议搭配稳定版指令集使用。</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>需要追踪的变量</label>
+                        <div id="mvuVariablesContainer"></div>
+                        <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap;">
+                            <button class="add-character-btn" onclick="addVariable()">➕ 添加变量</button>
+                            <button class="add-character-btn success" onclick="loadPresetVariables()">📋 加载预设变量</button>
+                            <button class="add-character-btn danger" onclick="clearAllVariables()">🗑️ 清空所有变量</button>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mvuStageSettings">分阶段角色设定说明</label>
+                        <textarea id="mvuStageSettings" placeholder="描述角色在不同阶段的行为变化，例如：&#10;- 好感度 0-30：冷淡，对话简短&#10;- 好感度 31-60：开始友好，愿意聊天&#10;- 好感度 61-80：信任玩家，会分享秘密&#10;- 好感度 81-100：完全信任，展现真实性格"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mvuDynamicWorld">动态世界内容说明</label>
+                        <textarea id="mvuDynamicWorld" placeholder="描述世界内容如何随变量变化，例如：&#10;- 时间为白天：街道繁忙，商店营业&#10;- 时间为夜晚：街道空旷，氛围神秘&#10;- 故事阶段为第二章：城市进入戒严状态"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mvuHtmlDisplay">HTML 状态栏显示需求</label>
+                        <textarea id="mvuHtmlDisplay" placeholder="描述需要在状态栏显示的内容，例如：&#10;- 显示好感度进度条（红色到粉色渐变）&#10;- 显示当前故事章节&#10;- 显示时间和天气"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="mvuNotes">其他特殊说明</label>
+                        <textarea id="mvuNotes" placeholder="其他 MVU 系统相关的补充说明"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 额外需求 -->
+            <div class="section" id="step-extra" data-nav-section>
+                <h2 class="collapsible" onclick="toggleCollapse(this)">
+                    <span class="collapsible-label">
+                        <span class="step-badge muted">Extra</span>
+                        <span class="collapsible-title">
+                            <span>额外需求</span>
+                            <small>记录特别说明、禁忌或灵感补充。</small>
+                        </span>
+                    </span>
+                    <span class="collapse-icon" aria-hidden="true">&#9662;</span>
+                </h2>
+                <div class="collapse-content">
+                    <div class="form-group">
+                        <label for="extraRequirements">特殊要求或补充说明</label>
+                        <textarea id="extraRequirements" placeholder="在这里填写任何额外的要求、想法或注意事项，例如：&#10;- 角色对话要有明显的口音或口头禅&#10;- 某些禁忌话题或敏感设定&#10;- 想要的叙事风格（严肃/轻松/黑暗/幽默等）"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 操作按钮 -->
+            <div class="action-buttons">
+                <button class="btn btn-primary" onclick="generateMarkdown()">📄 生成 Markdown</button>
+                <button class="btn btn-secondary" onclick="resetForm()">🔄 重置表单</button>
+            </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navButtons = Array.from(document.querySelectorAll('.nav-link'));
+            const sections = Array.from(document.querySelectorAll('[data-nav-section]'));
+
+            if (!navButtons.length || !sections.length) {
+                return;
+            }
+
+            const updateActive = (activeId) => {
+                navButtons.forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.target === activeId);
+                });
+            };
+
+            navButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const target = document.getElementById(btn.dataset.target);
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                        updateActive(btn.dataset.target);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.collapsible').forEach(header => {
+                header.setAttribute('aria-expanded', 'true');
+                header.setAttribute('role', 'button');
+                header.setAttribute('tabindex', '0');
+                const content = header.nextElementSibling;
+                if (content) {
+                    content.setAttribute('aria-hidden', 'false');
+                }
+                header.addEventListener('keydown', (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        toggleCollapse(header);
+                    }
+                });
+            });
+
+            updateActive(sections[0].id);
+
+            if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver((entries) => {
+                    const visible = entries
+                        .filter(entry => entry.isIntersecting)
+                        .sort((a, b) => {
+                            if (b.intersectionRatio !== a.intersectionRatio) {
+                                return b.intersectionRatio - a.intersectionRatio;
+                            }
+                            return a.boundingClientRect.top - b.boundingClientRect.top;
+                        });
+
+                    if (visible.length) {
+                        updateActive(visible[0].target.id);
+                    }
+                }, {
+                    root: null,
+                    threshold: 0.35,
+                    rootMargin: '-20% 0px -45% 0px'
+                });
+
+                sections.forEach(section => observer.observe(section));
+            } else {
+                const handleScroll = () => {
+                    const scrollTop = window.scrollY;
+                    let currentId = sections[0].id;
+                    sections.forEach(section => {
+                        if (section.offsetTop - 180 <= scrollTop) {
+                            currentId = section.id;
+                        }
+                    });
+                    updateActive(currentId);
+                };
+
+                window.addEventListener('scroll', handleScroll, { passive: true });
+                handleScroll();
+            }
+        });
+
+        let characterCount = 0;
+        let variableCount = 0;
+
+        // 初始化时添加一个角色卡和一个变量
+        window.onload = function() {
+            addCharacter();
+            addVariable();
+        };
+
+        // 添加角色卡片
+        function addCharacter() {
+            characterCount++;
+            const container = document.getElementById('charactersContainer');
+            const card = document.createElement('div');
+            card.className = 'character-card';
+            card.id = 'character-' + characterCount;
+            card.innerHTML = `
+                <h3>角色 ${characterCount}</h3>
+                <div class="form-group">
+                    <label>角色名称</label>
+                    <input type="text" class="char-name" placeholder="填写角色名称">
+                </div>
+                <div class="form-group">
+                    <label>角色定位</label>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <input type="checkbox" class="char-role-main" value="主角（NPC）">
+                            <label>主角（NPC）</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" class="char-role-important" value="重要配角">
+                            <label>重要配角</label>
+                        </div>
+                        <div class="checkbox-item">
+                            <input type="checkbox" class="char-role-normal" value="普通 NPC">
+                            <label>普通 NPC</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>人物设定大纲</label>
+                    <textarea class="char-outline" placeholder="简要描述角色的核心信息，例如：&#10;- 姓名：艾莉克斯&#10;- 性别/年龄：女/28岁&#10;- 职业：工程师&#10;- 核心性格：聪明、谨慎"></textarea>
+                </div>
+                ${characterCount > 1 ? '<button class="remove-character-btn" onclick="removeCharacter(' + characterCount + ')">删除此角色</button>' : ''}
+            `;
+            container.appendChild(card);
+        }
+
+        // 删除角色卡片
+        function removeCharacter(id) {
+            const card = document.getElementById('character-' + id);
+            if (card) {
+                card.remove();
+            }
+        }
+
+        // 添加变量卡片
+        function addVariable() {
+            variableCount++;
+            const container = document.getElementById('mvuVariablesContainer');
+            const card = document.createElement('div');
+            card.className = 'variable-card';
+            card.id = 'variable-' + variableCount;
+            card.innerHTML = `
+                <div class="form-group variable-name-group">
+                    <label>变量名</label>
+                    <input type="text" class="var-name" placeholder="例如：好感度">
+                </div>
+                <div class="form-group">
+                    <label>说明/要求</label>
+                    <textarea class="var-desc" placeholder="例如：数值范围 0-100，影响角色对话风格"></textarea>
+                </div>
+                ${variableCount > 1 ? '<div class="remove-btn-container"><button class="remove-character-btn" onclick="removeVariable(' + variableCount + ')">删除</button></div>' : ''}
+            `;
+            container.appendChild(card);
+        }
+
+        // 删除变量卡片
+        function removeVariable(id) {
+            const card = document.getElementById('variable-' + id);
+            if (card) {
+                card.remove();
+            }
+        }
+
+        // 清空所有变量
+        function clearAllVariables() {
+            if (confirm('确定要清空所有变量吗？此操作不可撤销。')) {
+                const container = document.getElementById('mvuVariablesContainer');
+                container.innerHTML = '';
+                variableCount = 0;
+                // 添加一个空白变量
+                addVariable();
+            }
+        }
+
+        // 加载预设变量
+        function loadPresetVariables() {
+            if (confirm('确定要加载预设变量吗？这将清空当前所有变量。')) {
+                // 清空现有变量
+                const container = document.getElementById('mvuVariablesContainer');
+                container.innerHTML = '';
+                variableCount = 0;
+
+                // 预设变量列表（通用版本）
+                const presetVariables = [
+                    {
+                        name: '世界.当前时间',
+                        desc: '格式为 yyyy年mm月dd日 星期X 上午/下午 hh:mm（24小时制），每次对话或场景转换后根据实际经历的时间自然推进'
+                    },
+                    {
+                        name: '世界.当前地点',
+                        desc: '具体的房间或场所名称，当角色明确移动到新地点时立即更新'
+                    },
+                    {
+                        name: '角色名.好感度',
+                        desc: '数值范围 0-100，初始值为0，每次对话后根据角色对{{user}}行为的感受更新，单次变化±1~5（多角色时为每个角色创建独立的好感度变量，如"艾莉克斯.好感度"）'
+                    },
+                    {
+                        name: '角色名.当前着装',
+                        desc: '详细描述角色当前的穿着，在起床后、洗澡后、外出前等场景需要更新（多角色时为每个角色创建独立的着装变量，如"艾莉克斯.当前着装"）'
+                    },
+                    {
+                        name: '角色名.当前姿势',
+                        desc: '描述角色此刻的身体姿态和动作，每次对话或场景变化时更新，反映当前状态和情绪（多角色时为每个角色创建独立的姿势变量，如"艾莉克斯.当前姿势"）'
+                    },
+                    {
+                        name: '角色名.当前想法',
+                        desc: '描述角色当前内心的真实想法，可能与外在表现不一致，每次对话后更新，展现内心活动（多角色时为每个角色创建独立的想法变量，如"艾莉克斯.当前想法"）'
+                    },
+                    {
+                        name: '角色名.关系状态',
+                        desc: '描述角色与{{user}}的关系阶段，如"陌生人"、"初识"、"朋友"、"亲密"等，随着好感度变化而更新（多角色时为每个角色创建独立的关系状态变量，如"艾莉克斯.关系状态"）'
+                    }
+                ];
+
+                // 添加预设变量
+                presetVariables.forEach(preset => {
+                    variableCount++;
+                    const card = document.createElement('div');
+                    card.className = 'variable-card';
+                    card.id = 'variable-' + variableCount;
+                    card.innerHTML = `
+                        <div class="form-group variable-name-group">
+                            <label>变量名</label>
+                            <input type="text" class="var-name" placeholder="例如：好感度" value="${preset.name}">
+                        </div>
+                        <div class="form-group">
+                            <label>说明/要求</label>
+                            <textarea class="var-desc" placeholder="例如：数值范围 0-100，影响角色对话风格">${preset.desc}</textarea>
+                        </div>
+                        <div class="remove-btn-container"><button class="remove-character-btn" onclick="removeVariable(${variableCount})">删除</button></div>
+                    `;
+                    container.appendChild(card);
+                });
+
+                alert('✅ 已加载 ' + presetVariables.length + ' 个预设变量！你可以根据需要进行修改或删除。');
+            }
+        }
+
+        // 切换折叠
+        function toggleCollapse(element) {
+            element.classList.toggle('collapsed');
+            const content = element.nextElementSibling;
+            if (content) {
+                content.classList.toggle('collapsed');
+                const isCollapsed = content.classList.contains('collapsed');
+                element.setAttribute('aria-expanded', (!isCollapsed).toString());
+                content.setAttribute('aria-hidden', isCollapsed.toString());
+            }
+        }
+
+        // 单选checkbox处理
+        document.addEventListener('change', function(e) {
+            if (e.target.type === 'checkbox' && e.target.name) {
+                const name = e.target.name;
+                const checkboxes = document.querySelectorAll(`input[name="${name}"]`);
+                if (e.target.checked) {
+                    checkboxes.forEach(cb => {
+                        if (cb !== e.target) cb.checked = false;
+                    });
+                }
+            }
+        });
+
+        // 生成 Markdown
+        function generateMarkdown() {
+            const workName = document.getElementById('workName').value || '作品名称';
+            let md = '# 角色卡创作任务清单\n\n';
+            md += '> 💡 **使用说明**：此文件由任务清单生成器自动生成，在创作过程中可以随时更新和调整。\n\n';
+            md += '> 📁 **文件组织建议**：\n';
+            md += `> - 请在 \`作品\` 目录下创建一个名为 \`${workName}\` 的文件夹\n`;
+            md += '> - 将此 to-do.md 文件放入该文件夹\n';
+            md += '> - 后续创作的所有相关文件（背景设定、角色卡、开场白等）也都放入此文件夹中\n';
+            md += '> - 这样可以保持项目文件的整洁和有序\n\n';
+            md += '---\n\n';
+
+            // 基本信息
+            md += '## 基本信息\n\n';
+            md += `**作品名称：** ${document.getElementById('workName').value || '_[待填写]_'}\n\n`;
+            md += `**作品类型：** ${document.getElementById('workType').value || '_[待填写]_'}\n\n`;
+            md += '---\n\n';
+
+            // 第一步：世界观构建
+            md += '## 创作任务清单\n\n';
+            md += '### ✅ 第一步：世界观构建\n\n';
+
+            const needBg = document.getElementById('needBackground').checked;
+            const noBg = document.getElementById('noBackground').checked;
+            md += '**背景设定需求：**\n';
+            md += `- [${needBg ? 'x' : ' '}] 需要\n`;
+            md += `- [${noBg ? 'x' : ' '}] 不需要\n\n`;
+
+            md += '**背景类型：**\n';
+            md += `- [${document.getElementById('bgType1').checked ? 'x' : ' '}] 世界观设定\n`;
+            md += `- [${document.getElementById('bgType2').checked ? 'x' : ' '}] 国家/城市/地点设定\n`;
+            md += `- [${document.getElementById('bgType3').checked ? 'x' : ' '}] 历史背景设定\n`;
+            md += `- [${document.getElementById('bgType4').checked ? 'x' : ' '}] 社会结构设定\n`;
+            md += `- [${document.getElementById('bgType5').checked ? 'x' : ' '}] 魔法系统设定\n`;
+            md += `- [${document.getElementById('bgType6').checked ? 'x' : ' '}] 科技系统设定\n`;
+            md += `- [${document.getElementById('bgType7').checked ? 'x' : ' '}] 游戏规则设定\n`;
+            md += `- [${document.getElementById('bgType8').checked ? 'x' : ' '}] 势力组织设定\n`;
+            md += `- [${document.getElementById('bgType9').checked ? 'x' : ' '}] 经济贸易设定\n`;
+            md += `- [${document.getElementById('bgType10').checked ? 'x' : ' '}] 文化风俗设定\n\n`;
+
+            const bgOutline = document.getElementById('backgroundOutline').value;
+            md += '**背景设定大纲：**\n';
+            if (bgOutline) {
+                md += '```\n' + bgOutline + '\n```\n\n';
+            } else {
+                md += '_[待填写]_\n\n';
+            }
+
+            md += '**参考模板：** `基础模板/Z.1.背景模板.md`\n\n';
+            md += '---\n\n';
+
+            // 第二步：角色设定
+            md += '### ✅ 第二步：角色设定\n\n';
+            const characterCards = document.querySelectorAll('.character-card');
+            md += `**主要角色数量：** ${characterCards.length}\n\n`;
+
+            characterCards.forEach((card, index) => {
+                md += `#### 角色 ${index + 1}\n\n`;
+                const name = card.querySelector('.char-name').value;
+                md += `**角色名称：** ${name || '_[待填写]_'}\n\n`;
+
+                md += '**角色定位：**\n';
+                md += `- [${card.querySelector('.char-role-main').checked ? 'x' : ' '}] 主角（NPC）\n`;
+                md += `- [${card.querySelector('.char-role-important').checked ? 'x' : ' '}] 重要配角\n`;
+                md += `- [${card.querySelector('.char-role-normal').checked ? 'x' : ' '}] 普通 NPC\n\n`;
+
+                const outline = card.querySelector('.char-outline').value;
+                md += '**人物设定大纲：**\n';
+                if (outline) {
+                    md += '```\n' + outline + '\n```\n\n';
+                } else {
+                    md += '_[待填写]_\n\n';
+                }
+
+                md += '**参考模板：** `基础模板/Z.2.人物模板.md`\n\n';
+                md += '---\n\n';
+            });
+
+            // 第三步：开场白
+            md += '### ✅ 第三步：开场白\n\n';
+            const needOpening = document.getElementById('needOpening').checked;
+            const noOpening = document.getElementById('noOpening').checked;
+            md += '**开场白需求：**\n';
+            md += `- [${needOpening ? 'x' : ' '}] 需要\n`;
+            md += `- [${noOpening ? 'x' : ' '}] 不需要\n\n`;
+
+            md += `**开场场景：** ${document.getElementById('openingScene').value || '_[待填写]_'}\n\n`;
+
+            md += '**目标篇幅：**\n';
+            md += `- [${document.getElementById('length1').checked ? 'x' : ' '}] 简单场景（300-500字）\n`;
+            md += `- [${document.getElementById('length2').checked ? 'x' : ' '}] 标准场景（500-800字）\n`;
+            md += `- [${document.getElementById('length3').checked ? 'x' : ' '}] 复杂场景（800-1500字）\n\n`;
+
+            const openingOutline = document.getElementById('openingOutline').value;
+            md += '**开场白大纲：**\n';
+            if (openingOutline) {
+                md += '```\n' + openingOutline + '\n```\n\n';
+            } else {
+                md += '_[待填写]_\n\n';
+            }
+
+            md += '**参考模板：** `基础模板/Z.3.开场白.md`\n\n';
+            md += '---\n\n';
+
+            // 第四步：对话补充
+            md += '### ✅ 第四步：对话补充（可选）\n\n';
+            const needDialogue = document.getElementById('needDialogue').checked;
+            const noDialogue = document.getElementById('noDialogue').checked;
+            md += '**是否需要对话补充：**\n';
+            md += `- [${needDialogue ? 'x' : ' '}] 需要\n`;
+            md += `- [${noDialogue ? 'x' : ' '}] 不需要\n\n`;
+
+            md += `**对应角色：** ${document.getElementById('dialogueCharacter').value || '_[待填写]_'}\n\n`;
+
+            md += '**场景需求：**\n';
+            md += `- [${document.getElementById('scene1').checked ? 'x' : ' '}] 日常闲聊\n`;
+            md += `- [${document.getElementById('scene2').checked ? 'x' : ' '}] 紧张时刻\n`;
+            md += `- [${document.getElementById('scene3').checked ? 'x' : ' '}] 战斗场景\n`;
+            md += `- [${document.getElementById('scene4').checked ? 'x' : ' '}] 亲密互动\n`;
+            md += `- [${document.getElementById('scene5').checked ? 'x' : ' '}] 情绪波动（高兴/愤怒/悲伤）\n\n`;
+
+            md += '**参考模板：** `基础模板/Z.4.对话补充.md`\n\n';
+            md += '---\n\n';
+
+            // 第五步：角色采访
+            md += '### ✅ 第五步：角色采访（可选）\n\n';
+            const needInterview = document.getElementById('needInterview').checked;
+            const noInterview = document.getElementById('noInterview').checked;
+            md += '**是否需要角色采访：**\n';
+            md += `- [${needInterview ? 'x' : ' '}] 需要\n`;
+            md += `- [${noInterview ? 'x' : ' '}] 不需要\n\n`;
+
+            md += `**对应角色：** ${document.getElementById('interviewCharacter').value || '_[待填写]_'}\n\n`;
+
+            const interviewTopics = document.getElementById('interviewTopics').value;
+            md += '**采访主题：**\n';
+            if (interviewTopics) {
+                md += '```\n' + interviewTopics + '\n```\n\n';
+            } else {
+                md += '_[待填写]_\n\n';
+            }
+
+            md += '**参考模板：** `基础模板/Z.5.角色采访.md`\n\n';
+            md += '---\n\n';
+
+            // 第六步：玩家角色设定
+            md += '### ✅ 第六步：玩家角色设定（可选）\n\n';
+            const needPlayer = document.getElementById('needPlayer').checked;
+            const noPlayer = document.getElementById('noPlayer').checked;
+            md += '**是否需要玩家设定：**\n';
+            md += `- [${needPlayer ? 'x' : ' '}] 需要\n`;
+            md += `- [${noPlayer ? 'x' : ' '}] 不需要\n\n`;
+
+            md += '**设定深度：**\n';
+            md += `- [${document.getElementById('depth1').checked ? 'x' : ' '}] 极简设定（最大自由度）\n`;
+            md += `- [${document.getElementById('depth2').checked ? 'x' : ' '}] 简化设定（有基本框架）\n`;
+            md += `- [${document.getElementById('depth3').checked ? 'x' : ' '}] 完整设定（明确背景和性格）\n\n`;
+
+            const playerOutline = document.getElementById('playerOutline').value;
+            md += '**玩家角色大纲：**\n';
+            if (playerOutline) {
+                md += '```\n' + playerOutline + '\n```\n\n';
+            } else {
+                md += '_[待填写]_\n\n';
+            }
+
+            md += '**参考模板：** `基础模板/Z.6.玩家模板.md`\n\n';
+            md += '---\n\n';
+
+            // 第七步：MVU 组件包
+            md += '### ✅ 第七步：MVU 组件包（可选）\n\n';
+            const needMVU = document.getElementById('needMVU').checked;
+            const noMVU = document.getElementById('noMVU').checked;
+            md += '**是否使用 MVU 组件包：**\n';
+            md += `- [${needMVU ? 'x' : ' '}] 需要\n`;
+            md += `- [${noMVU ? 'x' : ' '}] 不需要\n\n`;
+
+            md += '**组件选择：**\n';
+            md += `- [${document.getElementById('mvu1').checked ? 'x' : ' '}] 变量初始化条目（稳定版）\n`;
+            md += `- [${document.getElementById('mvu2').checked ? 'x' : ' '}] 变量初始化条目（Beta版）\n`;
+            md += `- [${document.getElementById('mvu3').checked ? 'x' : ' '}] 变量更新规则\n`;
+            md += `- [${document.getElementById('mvu4').checked ? 'x' : ' '}] 变量处理指令集（稳定版）\n`;
+            md += `- [${document.getElementById('mvu5').checked ? 'x' : ' '}] 变量处理指令集（Beta版）\n`;
+            md += `- [${document.getElementById('mvu6').checked ? 'x' : ' '}] 分阶段角色设定\n`;
+            md += `- [${document.getElementById('mvu7').checked ? 'x' : ' '}] 动态世界内容\n`;
+            md += `- [${document.getElementById('mvu8').checked ? 'x' : ' '}] HTML状态栏\n\n`;
+
+            // 收集变量信息
+            const variableCards = document.querySelectorAll('.variable-card');
+            md += '**需要追踪的变量：**\n\n';
+            if (variableCards.length > 0) {
+                variableCards.forEach((card, index) => {
+                    const varName = card.querySelector('.var-name').value || '_[待填写]_';
+                    const varDesc = card.querySelector('.var-desc').value || '_[待填写]_';
+                    md += `${index + 1}. **${varName}**：${varDesc}\n`;
+                });
+                md += '\n';
+            } else {
+                md += '_[待填写]_\n\n';
+            }
+
+            // 分阶段角色设定
+            const stageSettings = document.getElementById('mvuStageSettings').value;
+            md += '**分阶段角色设定说明：**\n';
+            if (stageSettings) {
+                md += '```\n' + stageSettings + '\n```\n\n';
+            } else {
+                md += '_[待填写]_\n\n';
+            }
+
+            // 动态世界内容
+            const dynamicWorld = document.getElementById('mvuDynamicWorld').value;
+            md += '**动态世界内容说明：**\n';
+            if (dynamicWorld) {
+                md += '```\n' + dynamicWorld + '\n```\n\n';
+            } else {
+                md += '_[待填写]_\n\n';
+            }
+
+            // HTML 状态栏
+            const htmlDisplay = document.getElementById('mvuHtmlDisplay').value;
+            md += '**HTML 状态栏显示需求：**\n';
+            if (htmlDisplay) {
+                md += '```\n' + htmlDisplay + '\n```\n\n';
+            } else {
+                md += '_[待填写]_\n\n';
+            }
+
+            // 其他特殊说明
+            const mvuNotes = document.getElementById('mvuNotes').value;
+            md += '**其他特殊说明：**\n';
+            if (mvuNotes) {
+                md += '```\n' + mvuNotes + '\n```\n\n';
+            } else {
+                md += '_[待填写]_\n\n';
+            }
+
+            md += '**参考模板：** `MVU组件包/` 目录下的相关文件\n\n';
+            md += '---\n\n';
+
+            // 额外需求
+            md += '## 额外需求\n\n';
+            const extraReq = document.getElementById('extraRequirements').value;
+            md += '**特殊要求或补充说明：**\n';
+            if (extraReq) {
+                md += '```\n' + extraReq + '\n```\n\n';
+            } else {
+                md += '_[待填写]_\n\n';
+            }
+            md += '---\n\n';
+
+            // 创作进度跟踪
+            md += '## 创作进度跟踪\n\n';
+            md += '- [ ] 背景设定完成\n';
+            md += '- [ ] 角色设定完成\n';
+            md += '- [ ] 开场白完成\n';
+            md += '- [ ] 对话补充完成（如需要）\n';
+            md += '- [ ] 角色采访完成（如需要）\n';
+            md += '- [ ] 玩家角色完成（如需要）\n';
+            md += '- [ ] MVU 组件包配置完成（如需要）\n';
+            md += '- [ ] 编写打包配置文件\n';
+            md += '- [ ] 运行打包程序生成角色卡\n\n';
+            md += '---\n\n';
+
+            // 打包说明
+            md += '## 📦 角色卡打包说明\n\n';
+            md += '完成所有创作内容后，需要使用打包程序将文件整合成 SillyTavern 可导入的角色卡 JSON 文件。\n\n';
+
+            md += '### 第一步：编写配置文件\n\n';
+            md += '在项目根目录创建一个 YAML 配置文件（例如：`' + workName + '.yaml`），内容参考以下格式：\n\n';
+            md += '```yaml\n';
+            md += '# 基础信息\n';
+            md += 'name: ' + workName + '\n';
+            md += 'creator: ""\n';
+            md += 'character_version: ""\n\n';
+            md += '# 主要字段映射\n';
+            md += 'fields:\n';
+            md += '  description: 作品/' + workName + '/角色设定_主角名.xyaml\n';
+            md += '  personality: ""\n';
+            md += '  scenario: ""\n';
+            md += '  first_mes: 作品/' + workName + '/开场白.md\n';
+            md += '  mes_example: ""\n';
+            md += '  creator_notes: ""\n';
+            md += '  system_prompt: ""\n';
+            md += '  post_history_instructions: ""\n\n';
+            md += '# 扩展字段\n';
+            md += 'extensions:\n';
+            md += '  talkativeness: "0.5"\n';
+            md += '  fav: false\n';
+            md += '  world: ' + workName + '\n';
+            md += '  status_bar: 作品/' + workName + '/状态栏.html  # 可选\n\n';
+            md += '# 角色书配置\n';
+            md += 'character_book:\n';
+            md += '  name: ' + workName + '\n';
+            md += '  entries:\n';
+            md += '    # [InitVar]初始化条目\n';
+            md += '    - comment: "[InitVar]初始化"\n';
+            md += '      content: 作品/' + workName + '/变量初始化_beta.xyaml\n';
+            md += '      enabled: false\n';
+            md += '      position: before_char\n';
+            md += '      insertion_order: 100\n';
+            md += '      depth: 4\n';
+            md += '      role: 0\n\n';
+            md += '    # 变量更新规则\n';
+            md += '    - comment: "变量更新规则"\n';
+            md += '      content: 作品/' + workName + '/变量更新规则.xyaml\n';
+            md += '      enabled: true\n';
+            md += '      position: at_depth\n';
+            md += '      insertion_order: 1\n';
+            md += '      depth: 1\n';
+            md += '      role: 0\n\n';
+            md += '    # 变量处理指令集\n';
+            md += '    - comment: "变量处理指令集"\n';
+            md += '      content: 作品/' + workName + '/变量处理指令集_beta.xyaml\n';
+            md += '      enabled: true\n';
+            md += '      position: at_depth\n';
+            md += '      insertion_order: 2\n';
+            md += '      depth: 1\n';
+            md += '      role: 0\n\n';
+            md += '    # 背景设定\n';
+            md += '    - comment: "背景设定"\n';
+            md += '      content: 作品/' + workName + '/背景设定.xyaml\n';
+            md += '      enabled: true\n';
+            md += '      position: before_char\n';
+            md += '      insertion_order: 1\n';
+            md += '      depth: 4\n';
+            md += '      role: 0\n\n';
+            md += '    # 玩家角色\n';
+            md += '    - comment: "玩家角色_{{user}}"\n';
+            md += '      content: 作品/' + workName + '/玩家角色_{{user}}.xyaml\n';
+            md += '      enabled: true\n';
+            md += '      position: before_char\n';
+            md += '      insertion_order: 2\n';
+            md += '      depth: 4\n';
+            md += '      role: 0\n\n';
+            md += '    # 其他设定条目（可添加多个）\n';
+            md += '    - comment: "其他设定条目1"\n';
+            md += '      content: 作品/' + workName + '/其他设定1.xyaml\n';
+            md += '      enabled: true\n';
+            md += '      position: after_char\n';
+            md += '      insertion_order: 1\n';
+            md += '      depth: 4\n';
+            md += '      role: 0\n';
+            md += '```\n\n';
+
+            md += '**配置说明：**\n\n';
+            md += '- `name`: 角色卡名称\n';
+            md += '- `fields`: 各个字段对应的文件路径，空字符串 `""` 表示该字段为空\n';
+            md += '- `extensions.status_bar`: 状态栏HTML文件路径（可选）\n';
+            md += '- `character_book.entries`: 角色书条目列表\n';
+            md += '  - `comment`: 条目名称\n';
+            md += '  - `content`: 条目内容对应的文件路径\n';
+            md += '  - `position`: 插入位置（`before_char`/`after_char`/`at_depth`）\n';
+            md += '  - `insertion_order`: 插入顺序（数字越小越靠前）\n';
+            md += '  - `depth`: 深度值（1-4）\n';
+            md += '  - `role`: 角色类型（0=系统，1=用户，2=AI）\n\n';
+
+            md += '**参考示例：** `config.example.yaml`\n\n';
+
+            md += '### 第二步：运行打包程序\n\n';
+            md += '确保已安装 Node.js 和依赖包，然后在项目根目录运行：\n\n';
+            md += '```bash\n';
+            md += '# 首次使用需要安装依赖\n';
+            md += 'npm install\n\n';
+            md += '# 运行打包程序\n';
+            md += 'node build-card.js ' + workName + '.yaml\n';
+            md += '```\n\n';
+
+            md += '程序会自动读取配置文件，整合所有内容，生成 `' + workName + '.json` 文件。\n\n';
+
+            md += '---\n\n';
+
+            // 版本记录
+            const today = new Date().toISOString().split('T')[0];
+            md += '## 版本记录\n\n';
+            md += `**v1.0** - ${today} - 初始版本创建\n\n`;
+            md += '---\n\n';
+            md += '> 💾 **提示**：建议使用 Git 进行版本管理，每完成一个重要阶段就提交一次，方便回溯和对比不同版本。\n';
+
+            // 下载文件
+            downloadMarkdown(md);
+        }
+
+        // 下载 Markdown 文件
+        function downloadMarkdown(content) {
+            const blob = new Blob([content], { type: 'text/markdown;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'to-do.md';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            alert('✅ Markdown 文件已生成！请查看下载的 to-do.md 文件。');
+        }
+
+        // 重置表单
+        function resetForm() {
+            if (confirm('确定要重置表单吗？所有填写的内容将被清空。')) {
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>晴美 状态</title>
+    <style>
+        :root {
+            --primary-color: #ff78b9;
+            --primary-dark: #e05397;
+            --accent-color: #ffb6d8;
+            --surface-color: rgba(255, 255, 255, 0.68);
+            --surface-strong: rgba(255, 255, 255, 0.85);
+            --text-primary: #312131;
+            --text-secondary: #6e4f6a;
+            --border-soft: rgba(255, 174, 211, 0.45);
+            --shadow-soft: rgba(224, 83, 151, 0.25);
+            --meter-start: #ffd4e7;
+            --meter-end: #ff649d;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', 'Hiragino Sans GB', Arial, sans-serif;
+            padding: 20px clamp(16px, 4vw, 48px);
+            background: transparent;
+            color: var(--text-primary);
+        }
+
+        .status-hud {
+            max-width: 760px;
+            margin: 0 auto;
+            border-radius: 20px;
+            background: linear-gradient(150deg, rgba(255, 255, 255, 0.92) 0%, rgba(255, 237, 246, 0.92) 100%);
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(12px);
+        }
+
+        .hud-frame {
+            position: relative;
+            z-index: 1;
+            padding: clamp(18px, 3vw, 28px);
+            display: flex;
+            flex-direction: column;
+            gap: clamp(18px, 3vw, 28px);
+        }
+
+        .hud-header {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 14px clamp(18px, 4vw, 32px);
+            justify-content: space-between;
+        }
+
+        .hud-title {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .hud-title span {
+            font-size: 13px;
+            letter-spacing: 2px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .hud-title h1 {
+            font-size: clamp(22px, 3.2vw, 28px);
+            font-weight: 700;
+            color: var(--text-primary);
+            letter-spacing: 1px;
+        }
+
+        .hud-status-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 14px;
+            border-radius: 999px;
+            background: linear-gradient(120deg, rgba(255, 120, 185, 0.2), rgba(255, 182, 216, 0.3));
+            border: 1px solid rgba(255, 120, 185, 0.28);
+        }
+
+        .hud-status-chip::before {
+            content: "";
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            box-shadow: 0 0 10px rgba(255, 120, 185, 0.8);
+        }
+
+        .hud-status-chip span {
+            font-size: 13px;
+            color: var(--text-secondary);
+            letter-spacing: 0.5px;
+        }
+
+        .hud-meta-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: clamp(12px, 3vw, 24px);
+            padding: 12px 16px;
+            border-radius: 14px;
+            background: linear-gradient(120deg, rgba(255, 255, 255, 0.45), rgba(255, 174, 211, 0.25));
+            border: 1px solid rgba(255, 174, 211, 0.35);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.35);
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            min-width: 0;
+        }
+
+        .meta-label {
+            font-size: 12px;
+            letter-spacing: 1.4px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+        }
+
+        .meta-value {
+            font-size: clamp(14px, 2.4vw, 16px);
+            font-weight: 600;
+            color: var(--text-primary);
+            white-space: nowrap;
+        }
+
+        .meta-divider {
+            width: 1px;
+            height: 28px;
+            background: rgba(255, 174, 211, 0.45);
+        }
+
+        .status-list {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(12px, 2vw, 16px);
+            padding: clamp(12px, 2vw, 16px) 0;
+        }
+
+        .status-item {
+            display: grid;
+            grid-template-columns: minmax(90px, 120px) 1fr;
+            align-items: start;
+            gap: 16px;
+            padding: 12px 16px;
+            border-radius: 14px;
+            background: var(--surface-color);
+            border: 1px solid var(--border-soft);
+            position: relative;
+        }
+
+        .status-item::before {
+            content: "";
+            position: absolute;
+            left: 14px;
+            top: 16px;
+            width: 4px;
+            height: calc(100% - 32px);
+            min-height: 20px;
+            border-radius: 999px;
+            background: linear-gradient(180deg, rgba(255, 120, 185, 0.8), rgba(255, 200, 222, 0.5));
+        }
+
+        .status-label {
+            font-size: 13px;
+            letter-spacing: 1.2px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            padding-left: 12px;
+        }
+
+        .status-value {
+            font-size: clamp(14px, 2.4vw, 16px);
+            font-weight: 600;
+            color: var(--text-primary);
+            line-height: 1.5;
+        }
+
+        .love-meter {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: clamp(14px, 2.5vw, 18px);
+            border-radius: 16px;
+            background: var(--surface-strong);
+            border: 1px solid rgba(255, 158, 206, 0.45);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.4);
+        }
+
+        .love-meter-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: space-between;
+        }
+
+        .love-meter-title {
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            color: var(--primary-dark);
+        }
+
+        .love-meter-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary-color);
+            text-shadow: 0 0 8px rgba(255, 120, 185, 0.25);
+        }
+
+        .meter-bar {
+            height: 14px;
+            border-radius: 999px;
+            background: rgba(255, 174, 211, 0.28);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .meter-fill {
+            height: 100%;
+            width: 0;
+            border-radius: inherit;
+            background: linear-gradient(90deg, var(--meter-start) 0%, var(--meter-end) 100%);
+            transition: width 0.4s ease;
+            box-shadow: 0 0 12px rgba(255, 120, 185, 0.4);
+        }
+
+        .love-meter-stats {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .love-meter-beat {
+            position: relative;
+            width: clamp(70px, 14vw, 120px);
+            height: clamp(18px, 3vw, 26px);
+            pointer-events: none;
+            overflow: hidden;
+            border-radius: 999px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.22), rgba(255, 255, 255, 0.05));
+            box-shadow: inset 0 0 6px rgba(255, 120, 185, 0.25);
+            color: #ff4fa0;
+        }
+
+        .love-meter-beat svg {
+            width: 200%;
+            height: 100%;
+            display: block;
+            animation: beat-slide 5.2s linear infinite;
+        }
+
+        .love-meter-beat path {
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 3;
+            stroke-linejoin: round;
+            stroke-linecap: round;
+            filter: drop-shadow(0 0 4px rgba(255, 79, 160, 0.45));
+        }
+
+        @keyframes beat-slide {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .hud-footer {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--text-secondary);
+            opacity: 0.7;
+        }
+
+        @media (max-width: 640px) {
+            .hud-meta-bar {
+                flex-direction: column;
+                align-items: flex-start;
+                padding: 12px;
+            }
+
+            .meta-divider {
+                display: none;
+            }
+
+            .meta-value {
+                white-space: normal;
+            }
+
+            .status-item {
+                grid-template-columns: 1fr;
+                padding-left: 28px;
+            }
+
+            .status-item::before {
+                left: 12px;
+            }
+
+            .status-label {
+                padding-left: 0;
+                letter-spacing: 1px;
+            }
+
+            .love-meter-value {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="status-hud" id="status-card">
+    <div class="hud-frame">
+        <div class="hud-header">
+            <div class="hud-title">
+                <span>恋爱同步频道</span>
+                <h1>恋爱面板</h1>
+            </div>
+            <div class="hud-status-chip">
+                <span>ACTIVE LINK</span>
+            </div>
+        </div>
+
+        <div class="hud-meta-bar">
+            <div class="meta-item">
+                <div class="meta-label">世界时间</div>
+                <div class="meta-value" id="world-time">--</div>
+            </div>
+            <div class="meta-divider"></div>
+            <div class="meta-item">
+                <div class="meta-label">当前地点</div>
+                <div class="meta-value" id="world-location">--</div>
+            </div>
+        </div>
+
+        <div class="status-list">
+            <div class="status-item">
+                <div class="status-label">当前着装</div>
+                <div class="status-value" id="harumi-outfit">--</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">当前姿势</div>
+                <div class="status-value" id="harumi-pose">--</div>
+            </div>
+            <div class="status-item">
+                <div class="status-label">内心想法</div>
+                <div class="status-value" id="harumi-thoughts">--</div>
+            </div>
+        </div>
+
+        <div class="love-meter">
+            <div class="love-meter-header">
+                <div class="love-meter-title">晴美 · 心动值</div>
+                <div class="love-meter-stats">
+                    <div class="love-meter-value" id="harumi-heart-value">--</div>
+                    <div class="love-meter-beat" aria-hidden="true">
+                        <svg viewBox="0 0 480 40" preserveAspectRatio="none">
+                            <path d="M0 20 L12 20 L20 8 L28 32 L36 20 L58 20 L66 10 L74 30 L82 20 L102 20 L110 6 L118 34 L126 20 L148 20 L156 10 L164 30 L172 20 L192 20 L200 8 L208 32 L216 20 L240 20"></path>
+                            <path d="M0 20 L12 20 L20 8 L28 32 L36 20 L58 20 L66 10 L74 30 L82 20 L102 20 L110 6 L118 34 L126 20 L148 20 L156 10 L164 30 L172 20 L192 20 L200 8 L208 32 L216 20 L240 20" transform="translate(240, 0)"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="meter-bar">
+                <div class="meter-fill" id="harumi-heart-fill"></div>
+            </div>
+        </div>
+
+        <div class="hud-footer">
+            <div>恋爱数据监视中 · 恋爱主题 HUD</div>
+            <div>© HeartLink Interface</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function SafeGetValue(obj, path, defaultValue = "N/A") {
+        let keys = Array.isArray(path) ? path : path.split('.');
+        let current = obj;
+        for (let i = 0; i < keys.length; i++) {
+            if (current === undefined || current === null || typeof current !== 'object' || !Object.prototype.hasOwnProperty.call(current, keys[i])) {
+                return defaultValue;
+            }
+            current = current[keys[i]];
+        }
+        if (current === undefined || current === null) {
+            return defaultValue;
+        }
+        if (Array.isArray(current)) {
+            if (current.length > 0) {
+                const actualValue = current[0];
+                if (typeof actualValue === 'boolean') {
+                    return actualValue;
+                }
+                return String(actualValue);
+            }
+            return defaultValue;
+        }
+        if (typeof current === 'boolean') {
+            return current;
+        }
+        return String(current);
+    }
+
+    function clampHeartValue(value) {
+        const numeric = Number(value);
+        if (Number.isNaN(numeric)) {
+            return null;
+        }
+        return Math.min(100, Math.max(0, Math.round(numeric)));
+    }
+
+    async function initDisplay() {
+        try {
+            const messages = await getChatMessages(getCurrentMessageId());
+            if (!messages || messages.length === 0 || !messages[0].data) {
+                document.getElementById('status-card').innerHTML = "<p style='color:red; padding:20px; text-align:center;'>无法加载状态数据</p>";
+                return;
+            }
+            const gameData = messages[0].data;
+            const characterData = gameData.stat_data;
+            if (!characterData) {
+                document.getElementById('status-card').innerHTML = "<p style='color:red; padding:20px; text-align:center;'>状态数据缺失</p>";
+                return;
+            }
+
+            const worldTimeElement = document.getElementById('world-time');
+            const worldLocationElement = document.getElementById('world-location');
+            const harumiOutfitElement = document.getElementById('harumi-outfit');
+            const harumiPoseElement = document.getElementById('harumi-pose');
+            const harumiThoughtsElement = document.getElementById('harumi-thoughts');
+            const harumiHeartValueElement = document.getElementById('harumi-heart-value');
+            const harumiHeartFillElement = document.getElementById('harumi-heart-fill');
+
+            if (Object.prototype.hasOwnProperty.call(characterData, '世界')) {
+                const worldTime = SafeGetValue(characterData, '世界.当前时间', '--');
+                const worldLocation = SafeGetValue(characterData, '世界.当前地点', '--');
+
+                if (worldTimeElement) worldTimeElement.innerText = worldTime;
+                if (worldLocationElement) worldLocationElement.innerText = worldLocation;
+            }
+
+            if (Object.prototype.hasOwnProperty.call(characterData, '晴美')) {
+                const outfit = SafeGetValue(characterData, '晴美.当前着装', '--');
+                const pose = SafeGetValue(characterData, '晴美.当前姿势', '--');
+                const thoughts = SafeGetValue(characterData, '晴美.当前想法', '--');
+                const heartRaw = SafeGetValue(characterData, '晴美.心动值', '--');
+                const heartValue = clampHeartValue(heartRaw);
+
+                if (harumiOutfitElement) harumiOutfitElement.innerText = outfit;
+                if (harumiPoseElement) harumiPoseElement.innerText = pose;
+                if (harumiThoughtsElement) harumiThoughtsElement.innerText = thoughts;
+
+                if (heartValue === null) {
+                    if (harumiHeartValueElement) harumiHeartValueElement.innerText = '--';
+                    if (harumiHeartFillElement) harumiHeartFillElement.style.width = '0%';
+                } else {
+                    if (harumiHeartValueElement) harumiHeartValueElement.innerText = `${heartValue}`;
+                    if (harumiHeartFillElement) harumiHeartFillElement.style.width = `${heartValue}%`;
+                }
+            }
+        } catch (error) {
+            document.getElementById('status-card').innerHTML = `<p style='color:red; padding:20px; text-align:center;'>加载出错: ${error.message}</p>`;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', initDisplay);
+</script>
+</body>
+</html>

@@ -1,0 +1,152 @@
+# 基础信息
+name: 红尘卷书
+creator: ""
+character_version: "1.0"
+
+# 主要字段映射
+fields:
+  description: ""
+  personality: ""
+  scenario: ""
+  first_mes: 作品/红尘卷书/开场白.md
+  mes_example: ""
+  creator_notes: ""
+  system_prompt: ""
+  post_history_instructions: ""
+
+# 扩展字段
+extensions:
+  talkativeness: "0.5"
+  fav: false
+  world: 红尘卷书
+  status_bar: 作品/红尘卷书/状态栏.html
+
+# 角色书配置
+character_book:
+  name: 红尘卷书
+  entries:
+    # [InitVar]初始化条目
+    - comment: "[InitVar]初始化"
+      content: 作品/红尘卷书/变量初始化_beta.xyaml
+      enabled: false
+      position: before_char
+      insertion_order: 100
+      depth: 4
+      role: 0
+
+    # 变量更新规则
+    - comment: "变量更新规则"
+      content: 作品/红尘卷书/变量更新规则.xyaml
+      enabled: true
+      position: at_depth
+      insertion_order: 1
+      depth: 1
+      role: 0
+
+    # 变量处理指令集
+    - comment: "变量处理指令集"
+      content: 作品/红尘卷书/变量处理指令集_beta.xyaml
+      enabled: true
+      position: at_depth
+      insertion_order: 2
+      depth: 1
+      role: 0
+
+    # 背景设定
+    - comment: "背景设定"
+      content: 作品/红尘卷书/背景设定.xyaml
+      enabled: true
+      position: before_char
+      insertion_order: 3
+      depth: 4
+      role: 0
+
+    # 背景设定-现代
+    - comment: "背景设定-现代"
+      content: 作品/红尘卷书/背景设定-现代.xyaml
+      enabled: false
+      position: before_char
+      insertion_order: 3
+      depth: 4
+      role: 0
+
+    # 玩家角色
+    - comment: "玩家角色_{{user}}"
+      content: 作品/红尘卷书/玩家角色_乞丐{{user}}.xyaml
+      enabled: true
+      position: before_char
+      insertion_order: 4
+      depth: 4
+      role: 0
+
+    # 玩家角色
+    - comment: "玩家角色_{{user}}"
+      content: 作品/红尘卷书/玩家角色_剑客{{user}}.xyaml
+      enabled: false
+      position: before_char
+      insertion_order: 4
+      depth: 4
+      role: 0
+
+    # 凌若雪角色设定
+    - comment: "角色设定_凌若雪"
+      content: 作品/红尘卷书/角色设定_凌若雪.xyaml
+      enabled: true
+      position: before_char
+      insertion_order: 5
+      depth: 4
+      role: 0
+
+    # 慕容芷角色设定
+    - comment: "角色设定_慕容芷"
+      content: 作品/红尘卷书/角色设定_慕容芷.xyaml
+      enabled: true
+      position: before_char
+      insertion_order: 6
+      depth: 4
+      role: 0
+
+    # 蓝灵儿角色设定
+    - comment: "角色设定_蓝灵儿"
+      content: 作品/红尘卷书/角色设定_蓝灵儿.xyaml
+      enabled: true
+      position: before_char
+      insertion_order: 7
+      depth: 4
+      role: 0
+
+    # 凌若雪分阶段设定
+    - comment: "凌若雪分阶段设定"
+      content: 作品/红尘卷书/凌若雪分阶段设定.xyaml
+      enabled: true
+      position: after_char
+      insertion_order: 8
+      depth: 4
+      role: 0
+
+    # 慕容芷分阶段设定
+    - comment: "慕容芷分阶段设定"
+      content: 作品/红尘卷书/慕容芷分阶段设定.xyaml
+      enabled: true
+      position: after_char
+      insertion_order: 9
+      depth: 4
+      role: 0
+
+    # 蓝灵儿分阶段设定
+    - comment: "蓝灵儿分阶段设定"
+      content: 作品/红尘卷书/蓝灵儿分阶段设定.xyaml
+      enabled: true
+      position: after_char
+      insertion_order: 10
+      depth: 4
+      role: 0
+
+    # 动态世界内容
+    - comment: "动态世界内容"
+      content: 作品/红尘卷书/动态世界内容.xyaml
+      enabled: true
+      position: after_char
+      insertion_order: 11
+      depth: 4
+      role: 0

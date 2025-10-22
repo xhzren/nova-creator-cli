@@ -1,0 +1,51 @@
+---
+<status_current_variables>
+{{get_message_variable::stat_data}}
+</status_current_variables>
+rule:
+  - You should output the update analysis in the end of the next reply.
+  - Use `_.set('path', 'old', 'new')` for direct assignment or state changes.
+  - Use `_.add('path', value)` to add or subtract a numerical value.
+  - Use `_.insert('path', 'item_or_key', 'value')` to add an element to an array or object.
+  - Use `_.remove('path', 'item_or_key')` to remove an element from an array or object.
+  - When using _.set with objects or arrays, do NOT wrap them in quotes - use direct object/array literals (e.g., {key: value} or [item1, item2])
+  - When using _.set with strings, DO wrap them in quotes (e.g., 'string value')
+  - When using _.set with numbers or booleans, do NOT use quotes (e.g., 42, true, false)
+format: |-
+  <UpdateVariable>
+    <Analysis>
+      ${variable_path}: ${Whether the variable should be updated: 'Yes' or 'No'}
+      ...
+    </Analysis>
+    ${command_expression}; // ${brief reason for change}
+    ...
+  </UpdateVariable>
+example: |-
+  <UpdateVariable>
+    <Analysis>
+      世界.当前时间: Yes
+      世界.当前地点: Yes
+      凌若雪.好感度: Yes
+      凌若雪.当前着装: No
+      凌若雪.当前姿势: No
+      凌若雪.当前想法: No
+      凌若雪.关系状态: No
+      凌若雪.是否相遇: No
+      慕容芷.好感度: No
+      慕容芷.当前着装: No
+      慕容芷.当前姿势: No
+      慕容芷.当前想法: No
+      慕容芷.关系状态: No
+      慕容芷.是否相遇: No
+      蓝灵儿.好感度: No
+      蓝灵儿.当前着装: No
+      蓝灵儿.当前姿势: No
+      蓝灵儿.当前想法: No
+      蓝灵儿.关系状态: No
+      蓝灵儿.是否相遇: No
+      江湖传记: No
+      任务列表: No
+    </Analysis>
+    _.set('世界.当前时间', '皇历368年 3月15日 星期五 晚上 07:30', '皇历368年 3月15日 星期五 晚上 08:00'); // 时间流逝,对话和战斗经过了约半小时
+    _.set('世界.当前地点', '清河镇外破庙', '破庙外空地'); // 将歹徒赶出破庙后的新位置
+    _.add('凌若雪.好感度', 8); // {{user}}出手相救,凌若雪非常感激

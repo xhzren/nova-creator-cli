@@ -1,0 +1,16 @@
+{
+  "name": "nova-creator-cli",
+  "version": "1.0.0",
+  "description": "SillyTavern character card builder",
+  "main": "build-card.js",
+  "type": "module",
+  "scripts": {
+    "build": "node build-card.js"
+  },
+  "keywords": ["sillytavern", "character-card"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "js-yaml": "^4.1.0"
+  }
+}

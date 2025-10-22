@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>橘日向 状态</title>
+    <style>
+        :root {
+            --primary-pink: #ffb3d9;
+            --secondary-pink: #ff99cc;
+            --accent-purple: #cc99ff;
+            --soft-blue: #99ccff;
+            --background-light: #fff5f8;
+            --text-dark: #4a4a4a;
+            --text-light: #8a8a8a;
+            --border-color: #ffe0ee;
+            --shadow-color: rgba(255, 179, 217, 0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', 'PingFang SC', Arial, sans-serif;
+            padding: 16px;
+            line-height: 1.6;
+        }
+
+        .status-card {
+            max-width: 600px;
+            margin: 0 auto;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px var(--shadow-color);
+            background: linear-gradient(135deg, var(--background-light) 0%, #ffffff 100%);
+            border: 3px solid var(--border-color);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-pink) 0%, var(--secondary-pink) 100%);
+            padding: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card-header::before {
+            content: '♥';
+            position: absolute;
+            font-size: 80px;
+            color: rgba(255, 255, 255, 0.1);
+            top: -20px;
+            left: -10px;
+            transform: rotate(-15deg);
+        }
+
+        .card-header::after {
+            content: '♥';
+            position: absolute;
+            font-size: 60px;
+            color: rgba(255, 255, 255, 0.1);
+            bottom: -15px;
+            right: -5px;
+            transform: rotate(15deg);
+        }
+
+        .card-header h2 {
+            color: white;
+            font-size: 26px;
+            font-weight: bold;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-body {
+            padding: 24px;
+        }
+
+        .section {
+            margin-bottom: 20px;
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            border: 2px solid var(--border-color);
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, var(--accent-purple) 0%, var(--soft-blue) 100%);
+            padding: 14px 18px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .section-header:hover {
+            filter: brightness(1.1);
+        }
+
+        .section-header.expanded-header {
+            border-bottom: 2px solid var(--border-color);
+        }
+
+        .section-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease;
+            background: white;
+        }
+
+        .section-content.expanded {
+            max-height: 2000px;
+        }
+
+        .property {
+            padding: 16px 18px;
+            border-bottom: 1px dashed var(--border-color);
+        }
+
+        .property:last-child {
+            border-bottom: none;
+        }
+
+        .property-name {
+            font-weight: bold;
+            color: var(--text-dark);
+            margin-bottom: 10px;
+            font-size: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .property-name::before {
+            content: '◆';
+            color: var(--secondary-pink);
+            margin-right: 8px;
+            font-size: 12px;
+        }
+
+        .property-value-container {
+            display: flex;
+            align-items: baseline;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+
+        .value-main {
+            font-size: 20px;
+            font-weight: bold;
+            color: var(--accent-purple);
+            margin-right: 8px;
+        }
+
+        .value-description {
+            font-size: 13px;
+            color: var(--text-light);
+            font-style: italic;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 20px;
+            background: linear-gradient(to right, #f0f0f0, #e8e8e8);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        .progress-bar-value {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-pink) 0%, var(--secondary-pink) 100%);
+            transition: width 0.6s ease;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(255, 179, 217, 0.5);
+        }
+
+        .text-content {
+            color: var(--text-dark);
+            font-size: 14px;
+            line-height: 1.8;
+            padding: 4px 0;
+            word-break: break-word;
+        }
+
+        .world-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 18px;
+            background: linear-gradient(135deg, #fff9fc 0%, #ffffff 100%);
+            border-radius: 12px;
+            margin-bottom: 16px;
+            border: 2px solid var(--border-color);
+        }
+
+        .world-info-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            flex: 1;
+        }
+
+        .world-info-label {
+            font-size: 12px;
+            color: var(--text-light);
+            margin-bottom: 4px;
+        }
+
+        .world-info-value {
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--text-dark);
+        }
+
+        @media (max-width: 480px) {
+            .card-header h2 {
+                font-size: 22px;
+            }
+            .section-header {
+                font-size: 14px;
+            }
+            .property-name {
+                font-size: 14px;
+            }
+            .value-main {
+                font-size: 18px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="status-card" id="status-card">
+    <div class="card-header">
+        <h2>♡ ひなたの状態 ♡</h2>
+    </div>
+
+    <div class="card-body">
+        <div class="world-info">
+            <div class="world-info-item">
+                <div class="world-info-label">时间</div>
+                <div class="world-info-value" id="world-time">--</div>
+            </div>
+            <div class="world-info-item">
+                <div class="world-info-label">地点</div>
+                <div class="world-info-value" id="world-location">--</div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header expanded-header" onclick="toggleSection(this)">
+                <span>橘日向 核心状态</span>
+                <span>▲</span>
+            </div>
+            <div class="section-content expanded">
+                <div class="property">
+                    <div class="property-name">好感度</div>
+                    <div class="property-value-container">
+                        <span class="value-main" id="hinata-affection">0</span>
+                        <span class="value-description" id="hinata-affection-desc"></span>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div id="hinata-affection-bar" class="progress-bar-value" style="width: 0%;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header expanded-header" onclick="toggleSection(this)">
+                <span>外观与状态</span>
+                <span>▲</span>
+            </div>
+            <div class="section-content expanded">
+                <div class="property">
+                    <div class="property-name">当前着装</div>
+                    <div class="text-content" id="hinata-outfit">--</div>
+                </div>
+                <div class="property">
+                    <div class="property-name">当前姿势</div>
+                    <div class="text-content" id="hinata-pose">--</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <div class="section-header expanded-header" onclick="toggleSection(this)">
+                <span>内心想法</span>
+                <span>▲</span>
+            </div>
+            <div class="section-content expanded">
+                <div class="property">
+                    <div class="property-name">当前所想</div>
+                    <div class="text-content" id="hinata-thoughts">--</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function SafeGetValue(obj, path, defaultValue = "N/A") {
+        let keys = Array.isArray(path) ? path : path.split('.');
+        let current = obj;
+        for (let i = 0; i < keys.length; i++) {
+            if (current === undefined || current === null || typeof current !== 'object' || !current.hasOwnProperty(keys[i])) {
+                return defaultValue;
+            }
+            current = current[keys[i]];
+        }
+        if (current === undefined || current === null) {
+            return defaultValue;
+        }
+        if (Array.isArray(current)) {
+            if (current.length > 0) {
+                 const actualValue = current[0];
+                 if (typeof actualValue === 'boolean') {
+                     return actualValue;
+                 }
+                 return String(actualValue);
+            } else {
+                 return defaultValue;
+            }
+        }
+        if (typeof current === 'boolean') {
+            return current;
+        }
+        return String(current);
+    }
+
+    function updateProgressBar(barId, valueMainId, valueDescId, rawValueFromCharacterData, min, max, color) {
+        const progressBar = document.getElementById(barId);
+        const valueMainDisplay = document.getElementById(valueMainId);
+        const valueDescDisplay = document.getElementById(valueDescId);
+        if (!valueMainDisplay) return;
+        let fullDisplayString = SafeGetValue({ temp: rawValueFromCharacterData }, 'temp', String(min));
+        let numericValue = min;
+        let descriptionText = "";
+        const descriptionMatch = String(fullDisplayString).match(/\((.+)\)$/);
+        if (descriptionMatch && descriptionMatch[1]) {
+            descriptionText = descriptionMatch[1];
+            fullDisplayString = String(fullDisplayString).substring(0, descriptionMatch.index).trim();
+        }
+        const valueMatch = String(fullDisplayString).match(/(-?\d+(\.\d+)?)(?=[^\d.]*$|->)/);
+        if (valueMatch) {
+            numericValue = parseFloat(valueMatch[1]);
+            const parts = String(fullDisplayString).split('->');
+            valueMainDisplay.innerText = parts.length > 1 ? parts[1].trim() : parts[0].trim();
+        } else if (!isNaN(parseFloat(fullDisplayString))) {
+            numericValue = parseFloat(fullDisplayString);
+            valueMainDisplay.innerText = fullDisplayString;
+        } else {
+            if (Array.isArray(rawValueFromCharacterData) && typeof rawValueFromCharacterData[0] === 'number') {
+                numericValue = rawValueFromCharacterData[0];
+                valueMainDisplay.innerText = String(numericValue);
+            } else if (typeof rawValueFromCharacterData === 'number' || typeof rawValueFromCharacterData === 'string') {
+                valueMainDisplay.innerText = String(rawValueFromCharacterData);
+            } else {
+                valueMainDisplay.innerText = SafeGetValue({ temp: rawValueFromCharacterData }, 'temp', String(min));
+            }
+        }
+        if (valueDescDisplay) {
+            valueDescDisplay.innerText = descriptionText ? `(${descriptionText})` : "";
+        }
+        if (progressBar) {
+            numericValue = Math.max(min, Math.min(max, numericValue));
+            const range = max - min;
+            const percentage = range === 0 ? (numericValue >= max ? 100 : 0) : ((numericValue - min) / range) * 100;
+            progressBar.style.width = `${Math.max(0, Math.min(100, percentage))}%`;
+            progressBar.style.backgroundColor = color ? color : 'var(--accent-highlight)';
+        }
+    }
+
+    async function initDisplay() {
+        try {
+            const messages = await getChatMessages(getCurrentMessageId());
+            if (!messages || messages.length === 0 || !messages[0].data) {
+                document.getElementById('status-card').innerHTML = "<p style='color:red; padding:10px;'>无法加载状态数据 (messages empty)</p>";
+                return;
+            }
+            const gameData = messages[0].data;
+            const characterData = gameData.stat_data;
+            if (!characterData) {
+                document.getElementById('status-card').innerHTML = "<p style='color:red; padding:10px;'>无法加载状态数据 (characterData missing)</p>";
+                return;
+            }
+
+            const worldTimeElement = document.getElementById('world-time');
+            const worldLocationElement = document.getElementById('world-location');
+            const hinataOutfitElement = document.getElementById('hinata-outfit');
+            const hinataPoseElement = document.getElementById('hinata-pose');
+            const hinataThoughtsElement = document.getElementById('hinata-thoughts');
+
+            if (characterData.hasOwnProperty('世界')) {
+                const worldTime = SafeGetValue(characterData, '世界.当前时间', '--');
+                const worldLocation = SafeGetValue(characterData, '世界.当前地点', '--');
+
+                if (worldTimeElement) worldTimeElement.innerText = worldTime;
+                if (worldLocationElement) worldLocationElement.innerText = worldLocation;
+            }
+
+            if (characterData.hasOwnProperty('橘日向')) {
+                updateProgressBar(
+                    'hinata-affection-bar',
+                    'hinata-affection',
+                    'hinata-affection-desc',
+                    SafeGetValue(characterData, '橘日向.好感度', 0),
+                    0,
+                    100,
+                    'linear-gradient(90deg, var(--primary-pink) 0%, var(--secondary-pink) 100%)'
+                );
+
+                const outfit = SafeGetValue(characterData, '橘日向.当前着装', '--');
+                const pose = SafeGetValue(characterData, '橘日向.当前姿势', '--');
+                const thoughts = SafeGetValue(characterData, '橘日向.当前想法', '--');
+
+                if (hinataOutfitElement) hinataOutfitElement.innerText = outfit;
+                if (hinataPoseElement) hinataPoseElement.innerText = pose;
+                if (hinataThoughtsElement) hinataThoughtsElement.innerText = thoughts;
+            }
+        } catch (error) {
+            document.getElementById('status-card').innerHTML = `<p style='color:red; padding:10px;'>状态栏加载出错: ${error.message}</p>`;
+        }
+    }
+
+    function toggleSection(element) {
+        const content = element.nextElementSibling;
+        const arrow = element.querySelector('span:last-child');
+        if (!content || !arrow) return;
+        const isExpanded = content.classList.toggle('expanded');
+        element.classList.toggle('expanded-header', isExpanded);
+        arrow.innerText = isExpanded ? '▲' : '▼';
+    }
+
+    document.addEventListener('DOMContentLoaded', initDisplay);
+</script>
+</body>
+</html>
